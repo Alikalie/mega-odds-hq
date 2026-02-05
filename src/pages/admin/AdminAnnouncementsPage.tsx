@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -20,6 +20,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+ import { AdminGuard } from "@/components/guards/AdminGuard";
+ import { supabase } from "@/integrations/supabase/client";
+ import { toast } from "sonner";
+ import { Loader2 } from "lucide-react";
 
 const mockAnnouncements: Announcement[] = [
   { id: "1", title: "Weekend Special Offer", description: "Get 50% off on VIP subscription this weekend only! Don't miss out on this amazing deal.", createdAt: "2 hours ago" },
@@ -52,6 +56,7 @@ const AdminAnnouncementsPage = () => {
   };
 
   return (
+     <AdminGuard>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
@@ -154,6 +159,7 @@ const AdminAnnouncementsPage = () => {
         </div>
       </div>
     </div>
+     </AdminGuard>
   );
 };
 

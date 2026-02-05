@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Star, Lock, Zap, Diamond, Sparkles, Rocket } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -6,9 +7,6 @@ import { CategoryCard } from "@/components/cards/CategoryCard";
 import { TipCard, Tip } from "@/components/cards/TipCard";
 import { UpgradeDialog } from "@/components/dialogs/UpgradeDialog";
 import { Button } from "@/components/ui/button";
-
-// Mock user state - will be replaced with auth
-const isSpecialUser = false;
 
 const specialCategories = [
   { title: "Banker Tips", description: "Guaranteed safe picks", icon: Diamond, count: 4 },
@@ -41,10 +39,11 @@ const mockSpecialTips: Tip[] = [
 ];
 
 const SpecialPage = () => {
+   const { isSpecial, isApproved, user } = useAuth();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [view, setView] = useState<"categories" | "tips">("categories");
 
-  if (!isSpecialUser) {
+   if (!user || !isApproved || !isSpecial) {
     return (
       <AppLayout>
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">

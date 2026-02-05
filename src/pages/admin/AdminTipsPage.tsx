@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -27,6 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+ import { AdminGuard } from "@/components/guards/AdminGuard";
+ import { supabase } from "@/integrations/supabase/client";
+ import { toast } from "sonner";
+ import { Loader2 } from "lucide-react";
 
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
@@ -102,6 +106,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   };
 
   return (
+     <AdminGuard>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
@@ -286,6 +291,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
         </div>
       </div>
     </div>
+     </AdminGuard>
   );
 };
 
