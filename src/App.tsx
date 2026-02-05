@@ -1,4 +1,5 @@
-import { Toaster } from "@/components/ui/toaster";
+ import { Toaster } from "@/components/ui/toaster";
+ import { AuthProvider } from "@/hooks/useAuth";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -19,12 +20,13 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+ const App = () => (
+   <QueryClientProvider client={queryClient}>
+     <AuthProvider>
+       <TooltipProvider>
+         <Toaster />
+         <Sonner />
+         <BrowserRouter>
         <Routes>
           {/* User Routes */}
           <Route path="/" element={<Index />} />
@@ -44,12 +46,13 @@ const App = () => (
           <Route path="/admin/announcements" element={<AdminAnnouncementsPage />} />
           <Route path="/admin/app-info" element={<AdminAppInfoPage />} />
           
-          {/* Catch-all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+           {/* Catch-all */}
+           <Route path="*" element={<NotFound />} />
+         </Routes>
+       </BrowserRouter>
+     </TooltipProvider>
+   </AuthProvider>
+ </QueryClientProvider>
 );
 
 export default App;

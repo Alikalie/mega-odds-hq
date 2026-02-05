@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+ import { AdminGuard } from "@/components/guards/AdminGuard";
+ import { useAuth } from "@/hooks/useAuth";
+ import { supabase } from "@/integrations/supabase/client";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -30,20 +33,46 @@ const sidebarItems = [
   { icon: Info, label: "App Info", href: "/admin/app-info" },
 ];
 
-const statsCards = [
-  { title: "Total Users", value: "2,456", icon: Users, change: "+12%", trend: "up" },
-  { title: "VIP Members", value: "342", icon: Crown, change: "+8%", trend: "up" },
-  { title: "Special Members", value: "89", icon: Star, change: "+15%", trend: "up" },
-  { title: "Pending Approval", value: "23", icon: Clock, change: "-5%", trend: "down" },
-  { title: "Tips Today", value: "48", icon: TrendingUp, change: "+20%", trend: "up" },
-  { title: "Approved Today", value: "12", icon: UserCheck, change: "+3%", trend: "up" },
-];
-
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+   const { profile } = useAuth();
+   const [stats, setStats] = useState({
+     totalUsers: 0,
+     vipMembers: 0,
+     specialMembers: 0,
+     pendingApproval: 0,
+   });
+ 
+   useEffect(() => {
+     fetchStats();
+   }, []);
+ 
+   const fetchStats = async () => {
+     try {
+       const { data: profiles } = await supabase.from("profiles").select("status, subscription");
+       if (profiles) {
+         setStats({
+           totalUsers: profiles.length,
+           vipMembers: profiles.filter((p) => p.subscription === "vip").length,
+           specialMembers: profiles.filter((p) => p.subscription === "special").length,
+           pendingApproval: profiles.filter((p) => p.status === "pending").length,
+         });
+       }
+     } catch (err) {
+       console.error("Error fetching stats:", err);
+     }
+   };
+ 
+   const statsCards = [
+     { title: "Total Users", value: stats.totalUsers.toString(), icon: Users },
+     { title: "VIP Members", value: stats.vipMembers.toString(), icon: Crown },
+     { title: "Special Members", value: stats.specialMembers.toString(), icon: Star },
+     { title: "Pending Approval", value: stats.pendingApproval.toString(), icon: Clock },
+   ];
 
   return (
+     <AdminGuard>
     <div className="min-h-screen bg-background flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
@@ -186,16 +215,6 @@ const AdminDashboard = () => {
                       )}
                     />
                   </div>
-                  <span
-                    className={cn(
-                      "text-xs font-medium px-2 py-0.5 rounded-full",
-                      stat.trend === "up"
-                        ? "bg-success/10 text-success"
-                        : "bg-destructive/10 text-destructive"
-                    )}
-                  >
-                    {stat.change}
-                  </span>
                 </div>
                 <div className="mt-3">
                   <p className="text-2xl font-bold font-display">{stat.value}</p>
@@ -272,6 +291,7 @@ const AdminDashboard = () => {
         </div>
       </main>
     </div>
+     </AdminGuard>
   );
 };
 

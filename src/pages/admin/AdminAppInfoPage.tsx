@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Save, Info } from "lucide-react";
@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+ import { AdminGuard } from "@/components/guards/AdminGuard";
+ import { supabase } from "@/integrations/supabase/client";
+ import { Loader2 } from "lucide-react";
 
 const AdminAppInfoPage = () => {
   const [info, setInfo] = useState({
@@ -33,6 +36,7 @@ Contact: support@megaodds.com`,
   };
 
   return (
+     <AdminGuard>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
@@ -99,6 +103,7 @@ Contact: support@megaodds.com`,
         </motion.div>
       </div>
     </div>
+     </AdminGuard>
   );
 };
 

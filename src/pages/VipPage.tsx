@@ -1,4 +1,5 @@
 import { useState } from "react";
+ import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Crown, Lock, Target, Percent, Flame, Gem } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -6,9 +7,6 @@ import { CategoryCard } from "@/components/cards/CategoryCard";
 import { TipCard, Tip } from "@/components/cards/TipCard";
 import { UpgradeDialog } from "@/components/dialogs/UpgradeDialog";
 import { Button } from "@/components/ui/button";
-
-// Mock user state - will be replaced with auth
-const isVipUser = false;
 
 const vipCategories = [
   { title: "VIP 2 Odds", description: "Premium 2 odds picks", icon: Target, count: 8 },
@@ -41,10 +39,11 @@ const mockVipTips: Tip[] = [
 ];
 
 const VipPage = () => {
+   const { isVip, isApproved, user } = useAuth();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [view, setView] = useState<"categories" | "tips">("categories");
 
-  if (!isVipUser) {
+   if (!user || !isApproved || !isVip) {
     return (
       <AppLayout>
         <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">

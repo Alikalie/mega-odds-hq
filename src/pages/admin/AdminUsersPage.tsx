@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+ import { supabase } from "@/integrations/supabase/client";
+ import { toast } from "sonner";
+ import { Loader2 } from "lucide-react";
+ import { AdminGuard } from "@/components/guards/AdminGuard";
 import { UserBadge } from "@/components/ui/user-badge";
 import {
   DropdownMenu,
@@ -35,17 +39,53 @@ interface User {
   createdAt: string;
 }
 
-const mockUsers: User[] = [
-  { id: "1", email: "john@example.com", fullName: "John Doe", status: "approved", subscription: "vip", role: "user", createdAt: "2024-01-15" },
-  { id: "2", email: "jane@example.com", fullName: "Jane Smith", status: "pending", subscription: "free", role: "user", createdAt: "2024-01-20" },
-  { id: "3", email: "bob@example.com", fullName: "Bob Wilson", status: "approved", subscription: "special", role: "user", createdAt: "2024-01-10" },
-  { id: "4", email: "alice@example.com", fullName: "Alice Brown", status: "blocked", subscription: "free", role: "user", createdAt: "2024-01-18" },
-  { id: "5", email: "admin@megaodds.com", fullName: "Admin User", status: "approved", subscription: "special", role: "admin", createdAt: "2024-01-01" },
-];
-
 const AdminUsersPage = () => {
-  const [users, setUsers] = useState(mockUsers);
+   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+   const [isLoading, setIsLoading] = useState(true);
+ 
+   useEffect(() => {
+     fetchUsers();
+   }, []);
+ 
+   const fetchUsers = async () => {
+     setIsLoading(true);
+     try {
+       // Fetch profiles
+       const { data: profiles, error: profilesError } = await supabase
+         .from("profiles")
+         .select("*")
+         .order("created_at", { ascending: false });
+ 
+       if (profilesError) throw profilesError;
+ 
+       // Fetch roles
+       const { data: roles, error: rolesError } = await supabase
+         .from("user_roles")
+         .select("user_id, role");
+ 
+       if (rolesError) throw rolesError;
+ 
+       const rolesMap = new Map(roles?.map((r) => [r.user_id, r.role]) || []);
+ 
+       const formattedUsers: User[] = (profiles || []).map((p) => ({
+         id: p.id,
+         email: p.email,
+         fullName: p.full_name || "",
+         status: p.status as User["status"],
+         subscription: p.subscription as User["subscription"],
+         role: (rolesMap.get(p.id) as User["role"]) || "user",
+         createdAt: new Date(p.created_at).toLocaleDateString(),
+       }));
+ 
+       setUsers(formattedUsers);
+     } catch (err) {
+       console.error("Error fetching users:", err);
+       toast.error("Failed to load users");
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
   const filteredUsers = users.filter(
     (user) =>
@@ -53,25 +93,59 @@ const AdminUsersPage = () => {
       user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleApprove = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: "approved" as const } : u))
-    );
+   const handleApprove = async (id: string) => {
+     const { error } = await supabase
+       .from("profiles")
+       .update({ status: "approved" })
+       .eq("id", id);
+ 
+     if (error) {
+       toast.error("Failed to approve user");
+       return;
+     }
+ 
+     toast.success("User approved");
+     setUsers((prev) =>
+       prev.map((u) => (u.id === id ? { ...u, status: "approved" as const } : u))
+     );
   };
 
-  const handleBlock = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: "blocked" as const } : u))
-    );
+   const handleBlock = async (id: string) => {
+     const { error } = await supabase
+       .from("profiles")
+       .update({ status: "blocked" })
+       .eq("id", id);
+ 
+     if (error) {
+       toast.error("Failed to block user");
+       return;
+     }
+ 
+     toast.success("User blocked");
+     setUsers((prev) =>
+       prev.map((u) => (u.id === id ? { ...u, status: "blocked" as const } : u))
+     );
   };
 
-  const handleUpgrade = (id: string, tier: "free" | "vip" | "special") => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, subscription: tier } : u))
-    );
+   const handleUpgrade = async (id: string, tier: "free" | "vip" | "special") => {
+     const { error } = await supabase
+       .from("profiles")
+       .update({ subscription: tier })
+       .eq("id", id);
+ 
+     if (error) {
+       toast.error("Failed to update subscription");
+       return;
+     }
+ 
+     toast.success(`User subscription updated to ${tier.toUpperCase()}`);
+     setUsers((prev) =>
+       prev.map((u) => (u.id === id ? { ...u, subscription: tier } : u))
+     );
   };
 
   return (
+     <AdminGuard>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
@@ -103,8 +177,12 @@ const AdminUsersPage = () => {
           </Button>
         </div>
 
-        {/* Users Table */}
-        <div className="glass-card rounded-xl overflow-hidden">
+         {isLoading ? (
+           <div className="flex items-center justify-center py-20">
+             <Loader2 className="w-8 h-8 animate-spin text-primary" />
+           </div>
+         ) : (
+           <div className="glass-card rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -198,8 +276,10 @@ const AdminUsersPage = () => {
             </table>
           </div>
         </div>
+         )}
       </div>
     </div>
+     </AdminGuard>
   );
 };
 

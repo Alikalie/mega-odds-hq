@@ -1,27 +1,101 @@
-import { useState } from "react";
+ import { useState } from "react";
+ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+ import { Button } from "@/components/ui/button";
+ import { useAuth } from "@/hooks/useAuth";
+ import { toast } from "sonner";
+ import { z } from "zod";
+ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type AuthMode = "login" | "register";
+ type AuthMode = "login" | "register";
+ 
+ const emailSchema = z.string().email("Please enter a valid email address");
+ const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
 const AuthPage = () => {
+   const navigate = useNavigate();
+   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPassword, setShowPassword] = useState(false);
+   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     fullName: "",
     confirmPassword: "",
   });
+   const [errors, setErrors] = useState<Record<string, string>>({});
+ 
+   const validateForm = () => {
+     const newErrors: Record<string, string> = {};
+ 
+     const emailResult = emailSchema.safeParse(formData.email);
+     if (!emailResult.success) {
+       newErrors.email = emailResult.error.errors[0].message;
+     }
+ 
+     const passwordResult = passwordSchema.safeParse(formData.password);
+     if (!passwordResult.success) {
+       newErrors.password = passwordResult.error.errors[0].message;
+     }
+ 
+     if (mode === "register") {
+       if (!formData.fullName.trim()) {
+         newErrors.fullName = "Full name is required";
+       }
+       if (formData.password !== formData.confirmPassword) {
+         newErrors.confirmPassword = "Passwords do not match";
+       }
+     }
+ 
+     setErrors(newErrors);
+     return Object.keys(newErrors).length === 0;
+   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will be connected to Supabase auth
-    console.log("Auth submit:", mode, formData);
+     
+     if (!validateForm()) return;
+     
+     setIsLoading(true);
+ 
+     try {
+       if (mode === "login") {
+         const { error } = await signIn(formData.email, formData.password);
+         if (error) {
+           if (error.message.includes("Invalid login credentials")) {
+             toast.error("Invalid email or password");
+           } else if (error.message.includes("Email not confirmed")) {
+             toast.error("Please verify your email before signing in");
+           } else {
+             toast.error(error.message);
+           }
+         } else {
+           toast.success("Welcome back!");
+           navigate("/");
+         }
+       } else {
+         const { error } = await signUp(formData.email, formData.password, formData.fullName);
+         if (error) {
+           if (error.message.includes("already registered")) {
+             toast.error("This email is already registered. Please sign in instead.");
+           } else {
+             toast.error(error.message);
+           }
+         } else {
+           toast.success("Account created! Please check your email to verify your account.");
+           navigate("/pending-approval");
+         }
+       }
+     } catch (err) {
+       toast.error("An unexpected error occurred");
+     } finally {
+       setIsLoading(false);
+     }
   };
 
   return (
@@ -81,6 +155,9 @@ const AuthPage = () => {
                     }
                   />
                 </div>
+                 {errors.fullName && (
+                   <p className="text-xs text-destructive">{errors.fullName}</p>
+                 )}
               </motion.div>
             )}
 
@@ -99,6 +176,9 @@ const AuthPage = () => {
                   }
                 />
               </div>
+               {errors.email && (
+                 <p className="text-xs text-destructive">{errors.email}</p>
+               )}
             </div>
 
             <div className="space-y-2">
@@ -127,6 +207,9 @@ const AuthPage = () => {
                   )}
                 </button>
               </div>
+             {errors.password && (
+               <p className="text-xs text-destructive">{errors.password}</p>
+             )}
             </div>
 
             {mode === "register" && (
@@ -150,6 +233,9 @@ const AuthPage = () => {
                     }
                   />
                 </div>
+                 {errors.confirmPassword && (
+                   <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                 )}
               </motion.div>
             )}
 
@@ -164,8 +250,21 @@ const AuthPage = () => {
               </div>
             )}
 
-            <Button variant="hero" size="lg" className="w-full" type="submit">
-              {mode === "login" ? "Sign In" : "Create Account"}
+             <Button
+               variant="hero"
+               size="lg"
+               className="w-full"
+               type="submit"
+               disabled={isLoading}
+             >
+               {isLoading ? (
+                 <>
+                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                   {mode === "login" ? "Signing In..." : "Creating Account..."}
+                 </>
+               ) : (
+                 mode === "login" ? "Sign In" : "Create Account"
+               )}
             </Button>
           </form>
 
@@ -175,7 +274,10 @@ const AuthPage = () => {
               {mode === "login" ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
-                onClick={() => setMode(mode === "login" ? "register" : "login")}
+                 onClick={() => {
+                   setMode(mode === "login" ? "register" : "login");
+                   setErrors({});
+                 }}
                 className="ml-1 text-primary font-medium hover:underline"
               >
                 {mode === "login" ? "Sign up" : "Sign in"}

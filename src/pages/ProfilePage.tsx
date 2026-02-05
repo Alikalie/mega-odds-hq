@@ -1,6 +1,6 @@
-import { useState } from "react";
+ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+ import { Link, useNavigate } from "react-router-dom";
 import {
   User,
   Settings,
@@ -13,35 +13,16 @@ import {
   HelpCircle,
   Crown,
   Star,
+   Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { UserBadge } from "@/components/ui/user-badge";
 import { Switch } from "@/components/ui/switch";
 import { AnnouncementCard, Announcement } from "@/components/cards/AnnouncementCard";
-
-// Mock user data - will be replaced with auth
-const mockUser = {
-  name: "Guest User",
-  email: "guest@example.com",
-  subscription: "free" as const,
-  status: "approved" as const,
-};
-
-const mockAnnouncements: Announcement[] = [
-  {
-    id: "1",
-    title: "Weekend Special Offer",
-    description: "Get 50% off on VIP subscription this weekend only!",
-    createdAt: "2 hours ago",
-  },
-  {
-    id: "2",
-    title: "New Features Added",
-    description: "Check out our new tip categories and improved accuracy tracking.",
-    createdAt: "1 day ago",
-  },
-];
+ import { useAuth } from "@/hooks/useAuth";
+ import { supabase } from "@/integrations/supabase/client";
+ import { toast } from "sonner";
 
 const menuItems = [
   { icon: User, label: "Edit Profile", href: "/profile/edit" },
@@ -51,12 +32,55 @@ const menuItems = [
 ];
 
 const ProfilePage = () => {
+   const navigate = useNavigate();
+   const { user, profile, isLoading, isAdmin, signOut } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [announcements, setAnnouncements] = useState(mockAnnouncements);
+   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+ 
+   useEffect(() => {
+     if (profile?.status === "approved") {
+       fetchAnnouncements();
+     }
+   }, [profile]);
+ 
+   const fetchAnnouncements = async () => {
+     const { data, error } = await supabase
+       .from("announcements")
+       .select("*")
+       .order("created_at", { ascending: false })
+       .limit(5);
+ 
+     if (!error && data) {
+       setAnnouncements(
+         data.map((a) => ({
+           id: a.id,
+           title: a.title,
+           description: a.description,
+           createdAt: new Date(a.created_at).toLocaleDateString(),
+         }))
+       );
+     }
+   };
 
   const handleDismissAnnouncement = (id: string) => {
     setAnnouncements((prev) => prev.filter((a) => a.id !== id));
   };
+ 
+   const handleSignOut = async () => {
+     await signOut();
+     toast.success("Signed out successfully");
+     navigate("/");
+   };
+ 
+   if (isLoading) {
+     return (
+       <AppLayout showInfo={false}>
+         <div className="flex items-center justify-center min-h-[60vh]">
+           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+         </div>
+       </AppLayout>
+     );
+   }
 
   return (
     <AppLayout showInfo={false}>
@@ -67,37 +91,79 @@ const ProfilePage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card rounded-2xl p-6"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground text-2xl font-bold">
-              {mockUser.name.charAt(0)}
-            </div>
-            <div className="flex-1">
-              <h2 className="font-display font-bold text-lg">{mockUser.name}</h2>
-              <p className="text-sm text-muted-foreground">{mockUser.email}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <UserBadge variant={mockUser.subscription} />
-                <UserBadge variant={mockUser.status} />
+           {user && profile ? (
+             <>
+               <div className="flex items-center gap-4">
+                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                   {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
+                 </div>
+                 <div className="flex-1">
+                   <h2 className="font-display font-bold text-lg">
+                     {profile.full_name || "User"}
+                   </h2>
+                   <p className="text-sm text-muted-foreground">{profile.email}</p>
+                   <div className="flex items-center gap-2 mt-2">
+                     <UserBadge variant={profile.subscription} />
+                     <UserBadge variant={profile.status} />
+                     {isAdmin && (
+                       <UserBadge variant="special" className="bg-accent/20 text-accent" />
+                     )}
+                   </div>
+                 </div>
               </div>
-            </div>
-          </div>
 
-          {mockUser.subscription === "free" && (
-            <div className="mt-4 pt-4 border-t border-border/50 flex gap-2">
-              <Button variant="vip" size="sm" className="flex-1" asChild>
-                <Link to="/vip">
-                  <Crown className="w-4 h-4 mr-1" />
-                  Get VIP
-                </Link>
-              </Button>
-              <Button variant="special" size="sm" className="flex-1" asChild>
-                <Link to="/special">
-                  <Star className="w-4 h-4 mr-1" />
-                  Get Special
-                </Link>
+               {profile.subscription === "free" && profile.status === "approved" && (
+                 <div className="mt-4 pt-4 border-t border-border/50 flex gap-2">
+                   <Button variant="vip" size="sm" className="flex-1" asChild>
+                     <Link to="/vip">
+                       <Crown className="w-4 h-4 mr-1" />
+                       Get VIP
+                     </Link>
+                   </Button>
+                   <Button variant="special" size="sm" className="flex-1" asChild>
+                     <Link to="/special">
+                       <Star className="w-4 h-4 mr-1" />
+                       Get Special
+                     </Link>
+                   </Button>
+                 </div>
+               )}
+ 
+               {isAdmin && (
+                 <div className="mt-4 pt-4 border-t border-border/50">
+                   <Button variant="outline" className="w-full" asChild>
+                     <Link to="/admin">
+                       <Shield className="w-4 h-4 mr-2" />
+                       Admin Dashboard
+                     </Link>
+                   </Button>
+                 </div>
+               )}
+             </>
+           ) : (
+             <div className="text-center py-4">
+               <p className="text-muted-foreground mb-4">
+                 Sign in to access your profile
+               </p>
+               <Button variant="hero" asChild>
+                 <Link to="/auth">Sign In / Register</Link>
               </Button>
             </div>
           )}
         </motion.div>
+ 
+         {/* Pending Status */}
+         {user && profile?.status === "pending" && (
+           <motion.div
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             className="bg-warning/10 border border-warning/20 rounded-xl p-4 text-center"
+           >
+             <p className="text-sm text-warning">
+               Your account is pending admin approval. You'll be notified once approved.
+             </p>
+           </motion.div>
+         )}
 
         {/* Announcements */}
         {announcements.length > 0 && (
@@ -142,7 +208,8 @@ const ProfilePage = () => {
         </motion.div>
 
         {/* Menu Items */}
-        <motion.div
+         {user && (
+           <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -161,7 +228,8 @@ const ProfilePage = () => {
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </Link>
           ))}
-        </motion.div>
+           </motion.div>
+         )}
 
         {/* Auth Buttons */}
         <motion.div
@@ -170,14 +238,20 @@ const ProfilePage = () => {
           transition={{ delay: 0.3 }}
           className="space-y-3 pt-4"
         >
-          <Button variant="hero" className="w-full" size="lg" asChild>
-            <Link to="/auth">Sign In / Register</Link>
-          </Button>
-          
-          <Button variant="ghost" className="w-full text-destructive hover:text-destructive">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+           {!user ? (
+             <Button variant="hero" className="w-full" size="lg" asChild>
+               <Link to="/auth">Sign In / Register</Link>
+             </Button>
+           ) : (
+             <Button
+               variant="ghost"
+               className="w-full text-destructive hover:text-destructive"
+               onClick={handleSignOut}
+             >
+               <LogOut className="w-4 h-4 mr-2" />
+               Sign Out
+             </Button>
+           )}
         </motion.div>
       </div>
     </AppLayout>
