@@ -1,101 +1,157 @@
- import { useState } from "react";
- import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
- import { Button } from "@/components/ui/button";
- import { useAuth } from "@/hooks/useAuth";
- import { toast } from "sonner";
- import { z } from "zod";
- import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Phone, Globe, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { countries, packageTypes } from "@/lib/countries";
 
- type AuthMode = "login" | "register";
- 
- const emailSchema = z.string().email("Please enter a valid email address");
- const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
+type AuthMode = "login" | "register";
+
+const emailSchema = z.string().email("Please enter a valid email address");
+const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
+const phoneSchema = z.string().min(6, "Please enter a valid phone number");
 
 const AuthPage = () => {
-   const navigate = useNavigate();
-   const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("login");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { signIn, signUp, user } = useAuth();
+  const [mode, setMode] = useState<AuthMode>("register");
   const [showPassword, setShowPassword] = useState(false);
-   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     fullName: "",
     confirmPassword: "",
+    phoneNumber: "",
+    countryCode: "+234",
+    country: "Nigeria",
+    packageType: searchParams.get("package") || "free",
   });
-   const [errors, setErrors] = useState<Record<string, string>>({});
- 
-   const validateForm = () => {
-     const newErrors: Record<string, string> = {};
- 
-     const emailResult = emailSchema.safeParse(formData.email);
-     if (!emailResult.success) {
-       newErrors.email = emailResult.error.errors[0].message;
-     }
- 
-     const passwordResult = passwordSchema.safeParse(formData.password);
-     if (!passwordResult.success) {
-       newErrors.password = passwordResult.error.errors[0].message;
-     }
- 
-     if (mode === "register") {
-       if (!formData.fullName.trim()) {
-         newErrors.fullName = "Full name is required";
-       }
-       if (formData.password !== formData.confirmPassword) {
-         newErrors.confirmPassword = "Passwords do not match";
-       }
-     }
- 
-     setErrors(newErrors);
-     return Object.keys(newErrors).length === 0;
-   };
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-   const handleSubmit = async (e: React.FormEvent) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  // Update package from URL
+  useEffect(() => {
+    const pkg = searchParams.get("package");
+    if (pkg && (pkg === "vip" || pkg === "special" || pkg === "free")) {
+      setFormData((prev) => ({ ...prev, packageType: pkg }));
+      setMode("register");
+    }
+  }, [searchParams]);
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    const emailResult = emailSchema.safeParse(formData.email);
+    if (!emailResult.success) {
+      newErrors.email = emailResult.error.errors[0].message;
+    }
+
+    const passwordResult = passwordSchema.safeParse(formData.password);
+    if (!passwordResult.success) {
+      newErrors.password = passwordResult.error.errors[0].message;
+    }
+
+    if (mode === "register") {
+      if (!formData.fullName.trim()) {
+        newErrors.fullName = "Full name is required";
+      }
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
+      const phoneResult = phoneSchema.safeParse(formData.phoneNumber);
+      if (!phoneResult.success) {
+        newErrors.phoneNumber = phoneResult.error.errors[0].message;
+      }
+      if (!formData.country) {
+        newErrors.country = "Please select your country";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-     
-     if (!validateForm()) return;
-     
-     setIsLoading(true);
- 
-     try {
-       if (mode === "login") {
-         const { error } = await signIn(formData.email, formData.password);
-         if (error) {
-           if (error.message.includes("Invalid login credentials")) {
-             toast.error("Invalid email or password");
-           } else if (error.message.includes("Email not confirmed")) {
-             toast.error("Please verify your email before signing in");
-           } else {
-             toast.error(error.message);
-           }
-         } else {
-           toast.success("Welcome back!");
-           navigate("/");
-         }
-       } else {
-         const { error } = await signUp(formData.email, formData.password, formData.fullName);
-         if (error) {
-           if (error.message.includes("already registered")) {
-             toast.error("This email is already registered. Please sign in instead.");
-           } else {
-             toast.error(error.message);
-           }
-         } else {
-           toast.success("Account created! Please check your email to verify your account.");
-           navigate("/pending-approval");
-         }
-       }
-     } catch (err) {
-       toast.error("An unexpected error occurred");
-     } finally {
-       setIsLoading(false);
-     }
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+
+    try {
+      if (mode === "login") {
+        const { error } = await signIn(formData.email, formData.password);
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("Invalid email or password");
+          } else if (error.message.includes("Email not confirmed")) {
+            toast.error("Please verify your email before signing in");
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Welcome back!");
+          navigate("/");
+        }
+      } else {
+        const { error } = await signUp(
+          formData.email,
+          formData.password,
+          formData.fullName,
+          formData.phoneNumber,
+          formData.countryCode,
+          formData.country,
+          formData.packageType
+        );
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast.error("This email is already registered. Please sign in instead.");
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Account created! Please check your email to verify your account.");
+          navigate("/pending-approval");
+        }
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCountryChange = (countryName: string) => {
+    const country = countries.find((c) => c.name === countryName);
+    if (country) {
+      setFormData({
+        ...formData,
+        country: country.name,
+        countryCode: country.dial,
+      });
+    }
   };
 
   return (
@@ -115,7 +171,7 @@ const AuthPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-sm space-y-8"
+          className="w-full max-w-sm space-y-6"
         >
           {/* Logo */}
           <div className="text-center space-y-2">
@@ -135,32 +191,109 @@ const AuthPage = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-2"
-              >
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
-                    className="pl-10 h-12 bg-secondary/50 border-border/50"
-                    value={formData.fullName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
-                    }
-                  />
+              <>
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      className="pl-10 h-12 bg-secondary/50 border-border/50"
+                      value={formData.fullName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
+                    />
+                  </div>
+                  {errors.fullName && (
+                    <p className="text-xs text-destructive">{errors.fullName}</p>
+                  )}
                 </div>
-                 {errors.fullName && (
-                   <p className="text-xs text-destructive">{errors.fullName}</p>
-                 )}
-              </motion.div>
+
+                {/* Country */}
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Select
+                    value={formData.country}
+                    onValueChange={handleCountryChange}
+                  >
+                    <SelectTrigger className="h-12 bg-secondary/50 border-border/50">
+                      <Globe className="w-5 h-5 mr-2 text-muted-foreground" />
+                      <SelectValue placeholder="Select your country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.name}>
+                          {country.name} ({country.dial})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.country && (
+                    <p className="text-xs text-destructive">{errors.country}</p>
+                  )}
+                </div>
+
+                {/* Phone Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">Contact Number</Label>
+                  <div className="flex gap-2">
+                    <div className="w-24 h-12 flex items-center justify-center bg-secondary/50 border border-border/50 rounded-md text-sm">
+                      {formData.countryCode}
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="Phone number"
+                        className="pl-10 h-12 bg-secondary/50 border-border/50"
+                        value={formData.phoneNumber}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phoneNumber: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                  {errors.phoneNumber && (
+                    <p className="text-xs text-destructive">{errors.phoneNumber}</p>
+                  )}
+                </div>
+
+                {/* Package Type */}
+                <div className="space-y-2">
+                  <Label htmlFor="packageType">Subscription Package</Label>
+                  <Select
+                    value={formData.packageType}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, packageType: value })
+                    }
+                  >
+                    <SelectTrigger className="h-12 bg-secondary/50 border-border/50">
+                      <Package className="w-5 h-5 mr-2 text-muted-foreground" />
+                      <SelectValue placeholder="Select package" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {packageTypes.map((pkg) => (
+                        <SelectItem key={pkg.id} value={pkg.id}>
+                          <div>
+                            <span className="font-medium">{pkg.name}</span>
+                            <span className="text-muted-foreground text-xs ml-2">
+                              - {pkg.description}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
 
+            {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -176,11 +309,12 @@ const AuthPage = () => {
                   }
                 />
               </div>
-               {errors.email && (
-                 <p className="text-xs text-destructive">{errors.email}</p>
-               )}
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
             </div>
 
+            {/* Password */}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -207,18 +341,14 @@ const AuthPage = () => {
                   )}
                 </button>
               </div>
-             {errors.password && (
-               <p className="text-xs text-destructive">{errors.password}</p>
-             )}
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password}</p>
+              )}
             </div>
 
+            {/* Confirm Password */}
             {mode === "register" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-2"
-              >
+              <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -233,10 +363,10 @@ const AuthPage = () => {
                     }
                   />
                 </div>
-                 {errors.confirmPassword && (
-                   <p className="text-xs text-destructive">{errors.confirmPassword}</p>
-                 )}
-              </motion.div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                )}
+              </div>
             )}
 
             {mode === "login" && (
@@ -250,21 +380,21 @@ const AuthPage = () => {
               </div>
             )}
 
-             <Button
-               variant="hero"
-               size="lg"
-               className="w-full"
-               type="submit"
-               disabled={isLoading}
-             >
-               {isLoading ? (
-                 <>
-                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                   {mode === "login" ? "Signing In..." : "Creating Account..."}
-                 </>
-               ) : (
-                 mode === "login" ? "Sign In" : "Create Account"
-               )}
+            <Button
+              variant="hero"
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {mode === "login" ? "Signing In..." : "Creating Account..."}
+                </>
+              ) : (
+                mode === "login" ? "Sign In" : "Create Account"
+              )}
             </Button>
           </form>
 
@@ -274,10 +404,10 @@ const AuthPage = () => {
               {mode === "login" ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
-                 onClick={() => {
-                   setMode(mode === "login" ? "register" : "login");
-                   setErrors({});
-                 }}
+                onClick={() => {
+                  setMode(mode === "login" ? "register" : "login");
+                  setErrors({});
+                }}
                 className="ml-1 text-primary font-medium hover:underline"
               >
                 {mode === "login" ? "Sign up" : "Sign in"}

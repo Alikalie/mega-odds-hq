@@ -1,12 +1,14 @@
-import { useState } from "react";
- import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Star, Lock, Zap, Diamond, Sparkles, Rocket } from "lucide-react";
+import { Star, Lock, Zap, Diamond, Sparkles, Rocket, Crown, Shield } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { CategoryCard } from "@/components/cards/CategoryCard";
 import { TipCard, Tip } from "@/components/cards/TipCard";
-import { UpgradeDialog } from "@/components/dialogs/UpgradeDialog";
 import { Button } from "@/components/ui/button";
+import { VipPackageCard } from "@/components/packages/VipPackageCard";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const specialCategories = [
   { title: "Banker Tips", description: "Guaranteed safe picks", icon: Diamond, count: 4 },
@@ -15,97 +17,144 @@ const specialCategories = [
   { title: "Exclusive Picks", description: "Hand-picked by experts", icon: Rocket, count: 3 },
 ];
 
-const mockSpecialTips: Tip[] = [
+const specialPackages = [
   {
-    id: "s1",
-    homeTeam: "Juventus",
-    awayTeam: "Napoli",
-    prediction: "1X & Over 1.5",
-    odds: "2.45",
-    matchTime: "18:00",
-    league: "Serie A",
-    status: "pending",
+    tier: "vip" as const,
+    title: "VIP Monthly",
+    price: "$49",
+    period: "month",
+    features: [
+      "Daily VIP predictions",
+      "80%+ accuracy rate",
+      "Priority support",
+      "VIP community access",
+    ],
   },
   {
-    id: "s2",
-    homeTeam: "Atletico Madrid",
-    awayTeam: "Sevilla",
-    prediction: "BTTS & Over 2.5",
-    odds: "3.10",
-    matchTime: "21:00",
-    league: "La Liga",
-    status: "pending",
+    tier: "special" as const,
+    title: "Special Package",
+    price: "$99",
+    period: "month",
+    isPopular: true,
+    features: [
+      "All VIP features included",
+      "High-stakes predictions",
+      "1-on-1 expert consultation",
+      "Personalized strategies",
+      "Early access to tips",
+      "100% Money-back guarantee",
+    ],
   },
 ];
 
 const SpecialPage = () => {
-   const { isSpecial, isApproved, user } = useAuth();
-  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { isSpecial, isApproved, user } = useAuth();
   const [view, setView] = useState<"categories" | "tips">("categories");
+  const [tips, setTips] = useState<Tip[]>([]);
 
-   if (!user || !isApproved || !isSpecial) {
+  useEffect(() => {
+    if (isSpecial && isApproved) {
+      fetchTips();
+    }
+  }, [isSpecial, isApproved]);
+
+  const fetchTips = async () => {
+    const { data } = await supabase
+      .from("special_tips")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) {
+      setTips(
+        data.map((t) => ({
+          id: t.id,
+          homeTeam: t.home_team,
+          awayTeam: t.away_team,
+          prediction: t.prediction,
+          odds: t.odds,
+          matchTime: t.match_time,
+          league: t.league,
+          status: t.status,
+        }))
+      );
+    }
+  };
+
+  // Not logged in or not Special - Show packages
+  if (!user || !isApproved || !isSpecial) {
     return (
       <AppLayout>
-        <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-          {/* Locked State */}
+        <div className="px-4 py-6 space-y-8 max-w-lg mx-auto">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-12 space-y-6"
+            className="text-center space-y-4"
           >
-            <div className="w-24 h-24 mx-auto rounded-3xl bg-special/10 flex items-center justify-center">
-              <Lock className="w-12 h-12 text-special" />
+            <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-special to-red-500 flex items-center justify-center shadow-glow-special">
+              <Star className="w-10 h-10 text-special-foreground" />
             </div>
             
-            <div className="space-y-2">
-              <h1 className="text-2xl font-display font-bold">
-                Special <span className="text-special">Predictions</span>
-              </h1>
-              <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                Access exclusive high-stakes predictions designed for serious bettors.
-              </p>
-            </div>
-
-            <div className="glass-card rounded-2xl p-6 space-y-4 text-left">
-              <h3 className="font-semibold flex items-center gap-2">
-                <Star className="w-5 h-5 text-special" />
-                Special Benefits
-              </h3>
-              <ul className="space-y-3 text-sm">
-                {[
-                  "All VIP features included",
-                  "High-stakes exclusive predictions",
-                  "Personalized betting strategies",
-                  "1-on-1 expert consultation",
-                  "Early access to tips",
-                  "Money-back guarantee",
-                ].map((benefit, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-special/20 flex items-center justify-center">
-                      <Star className="w-3 h-3 text-special" />
-                    </div>
-                    <span className="text-muted-foreground">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <Button
-              variant="special"
-              size="xl"
-              className="w-full"
-              onClick={() => setShowUpgrade(true)}
-            >
-              <Star className="w-5 h-5 mr-2" />
-              Upgrade to Special
-            </Button>
+            <h1 className="text-3xl font-display font-bold">
+              Special <span className="text-special">Packages</span>
+            </h1>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              Exclusive high-stakes predictions for serious bettors.
+            </p>
           </motion.div>
 
-          <UpgradeDialog
-            open={showUpgrade}
-            onOpenChange={setShowUpgrade}
-            tier="special"
-          />
+          {/* Special Benefits */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card rounded-2xl p-5 space-y-4"
+          >
+            <h3 className="font-semibold flex items-center gap-2">
+              <Shield className="w-5 h-5 text-special" />
+              Special Member Benefits
+            </h3>
+            <div className="space-y-3">
+              {[
+                { icon: Crown, text: "All VIP features included" },
+                { icon: Zap, text: "High-stakes exclusive picks" },
+                { icon: Diamond, text: "Personal betting advisor" },
+                { icon: Star, text: "Money-back guarantee" },
+              ].map((benefit, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-special/10 flex items-center justify-center">
+                    <benefit.icon className="w-4 h-4 text-special" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">{benefit.text}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Packages */}
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Compare Packages
+            </h2>
+            {specialPackages.map((pkg, i) => (
+              <VipPackageCard key={pkg.title} {...pkg} index={i} />
+            ))}
+          </div>
+
+          {/* Login CTA */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-center space-y-3"
+          >
+            <p className="text-sm text-muted-foreground">Already have an account?</p>
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/auth">
+                <Lock className="w-4 h-4 mr-2" />
+                Login to Access Special
+              </Link>
+            </Button>
+          </motion.div>
         </div>
       </AppLayout>
     );
@@ -173,9 +222,13 @@ const SpecialPage = () => {
             animate={{ opacity: 1 }}
             className="space-y-3"
           >
-            {mockSpecialTips.map((tip, i) => (
-              <TipCard key={tip.id} tip={tip} index={i} />
-            ))}
+            {tips.length > 0 ? (
+              tips.map((tip, i) => <TipCard key={tip.id} tip={tip} index={i} />)
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No Special tips available yet. Check back soon!
+              </p>
+            )}
           </motion.div>
         )}
       </div>

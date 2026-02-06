@@ -27,7 +27,15 @@
    isApproved: boolean;
    isVip: boolean;
    isSpecial: boolean;
-   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    phoneNumber?: string,
+    countryCode?: string,
+    country?: string,
+    packageType?: string
+  ) => Promise<{ error: Error | null }>;
    signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
    signOut: () => Promise<void>;
    refreshProfile: () => Promise<void>;
@@ -127,22 +135,34 @@
      return () => subscription.unsubscribe();
    }, []);
  
-   const signUp = async (email: string, password: string, fullName: string) => {
-     const redirectUrl = `${window.location.origin}/`;
-     
-     const { error } = await supabase.auth.signUp({
-       email,
-       password,
-       options: {
-         emailRedirectTo: redirectUrl,
-         data: {
-           full_name: fullName,
-         },
-       },
-     });
- 
-     return { error };
-   };
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    phoneNumber?: string,
+    countryCode?: string,
+    country?: string,
+    packageType?: string
+  ) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: fullName,
+          phone_number: phoneNumber || "",
+          country_code: countryCode || "",
+          country: country || "",
+          package_type: packageType || "free",
+        },
+      },
+    });
+
+    return { error };
+  };
  
    const signIn = async (email: string, password: string) => {
      const { error } = await supabase.auth.signInWithPassword({
