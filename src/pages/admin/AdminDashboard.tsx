@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: FileText, label: "Categories", href: "/admin/categories" },
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: Trophy, label: "Free Tips", href: "/admin/free-tips" },
   { icon: Crown, label: "VIP Tips", href: "/admin/vip-tips" },

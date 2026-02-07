@@ -191,6 +191,51 @@ export type Database = {
         }
         Relationships: []
       }
+      tip_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon: string
+          id: string
+          is_active: boolean | null
+          is_special: boolean | null
+          is_vip: boolean | null
+          name: string
+          slug: string
+          tip_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          is_special?: boolean | null
+          is_vip?: boolean | null
+          name: string
+          slug: string
+          tip_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          is_special?: boolean | null
+          is_vip?: boolean | null
+          name?: string
+          slug?: string
+          tip_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
