@@ -57,11 +57,11 @@ interface TipCategoryGridProps {
 export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {[...Array(12)].map((_, i) => (
           <div
             key={i}
-            className="aspect-[4/3] rounded-xl bg-card/50 animate-pulse"
+            className="aspect-square rounded-lg bg-card/50 animate-pulse"
           />
         ))}
       </div>
@@ -69,7 +69,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-2">
       {categories.map((category, index) => {
         const IconComponent = iconMap[category.icon] || Trophy;
         const href = category.is_vip
@@ -83,13 +83,13 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
             key={category.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.03, duration: 0.2 }}
+            transition={{ delay: index * 0.02, duration: 0.2 }}
           >
             <Link to={href} className="block">
               <div
                 className={cn(
-                  "relative overflow-hidden rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 transition-all duration-200 tap-highlight group",
-                  "bg-gradient-to-br from-card to-card/80 border-2",
+                  "relative overflow-hidden rounded-lg p-2 aspect-square flex flex-col items-center justify-center gap-1 transition-all duration-200 tap-highlight group",
+                  "bg-gradient-to-br from-card to-card/80 border",
                   category.is_vip
                     ? "border-vip/30 hover:border-vip/60 hover:shadow-glow-vip"
                     : category.is_special
@@ -101,7 +101,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                 {(category.is_vip || category.is_special) && (
                   <div
                     className={cn(
-                      "absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
+                      "absolute top-1 right-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase",
                       category.is_vip
                         ? "bg-vip/20 text-vip"
                         : "bg-special/20 text-special"
@@ -114,7 +114,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-14 h-14 rounded-full flex items-center justify-center transition-transform group-hover:scale-110",
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110",
                     category.is_vip
                       ? "bg-vip/10"
                       : category.is_special
@@ -124,7 +124,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                 >
                   <IconComponent
                     className={cn(
-                      "w-7 h-7",
+                      "w-5 h-5",
                       category.is_vip
                         ? "text-vip"
                         : category.is_special
@@ -135,7 +135,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                 </div>
 
                 {/* Name */}
-                <span className="text-sm font-bold text-center uppercase tracking-wide">
+                <span className="text-[10px] font-bold text-center uppercase tracking-wide leading-tight line-clamp-2 px-1">
                   {category.name}
                 </span>
 
@@ -143,7 +143,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                 {category.tip_count > 0 && (
                   <span
                     className={cn(
-                      "absolute bottom-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-semibold",
+                      "absolute bottom-1 right-1 w-5 h-5 rounded-full text-[9px] font-semibold flex items-center justify-center",
                       category.is_vip
                         ? "bg-vip/20 text-vip"
                         : category.is_special
