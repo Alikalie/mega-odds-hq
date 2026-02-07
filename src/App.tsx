@@ -16,6 +16,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminTipsPage from "./pages/admin/AdminTipsPage";
 import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
 import AdminAppInfoPage from "./pages/admin/AdminAppInfoPage";
+import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const queryClient = new QueryClient();
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/categories" element={<AdminCategoriesPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/free-tips" element={<AdminTipsPage tipType="free" />} />
           <Route path="/admin/vip-tips" element={<AdminTipsPage tipType="vip" />} />
