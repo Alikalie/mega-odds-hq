@@ -1,170 +1,163 @@
-import { useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Target,
-  Percent,
-  Timer,
-  Dices,
-  Trophy,
-  Flame,
-  Goal,
-  ArrowUpDown,
-} from "lucide-react";
+import { ArrowLeft, Clock, Check, X, Minus, Trophy } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CategoryCard } from "@/components/cards/CategoryCard";
-import { TipCard, Tip } from "@/components/cards/TipCard";
 import { Button } from "@/components/ui/button";
+import { useFreeTips } from "@/hooks/useFreeTips";
+import { useTipCategories } from "@/hooks/useTipCategories";
+import { cn } from "@/lib/utils";
 
-const categories = [
-  { title: "2 Odds Daily", description: "Safe bets with 2.0 odds", icon: Target, count: 5 },
-  { title: "5 Odds Daily", description: "Medium risk, good returns", icon: Percent, count: 3 },
-  { title: "10 Odds Daily", description: "Higher odds, bigger wins", icon: Timer, count: 2 },
-  { title: "Rollover Tips", description: "Accumulator predictions", icon: Dices, count: 4 },
-  { title: "Straight Wins", description: "Home & away wins", icon: Trophy, count: 6 },
-  { title: "Hot Tips", description: "Today's best picks", icon: Flame, count: 3 },
-  { title: "BTTS", description: "Both teams to score", icon: Goal, count: 4 },
-  { title: "Over/Under", description: "Goals predictions", icon: ArrowUpDown, count: 5 },
-];
-
-// Mock tips data
-const mockTips: Tip[] = [
-  {
-    id: "1",
-    homeTeam: "Manchester United",
-    awayTeam: "Liverpool",
-    prediction: "Over 2.5",
-    odds: "1.85",
-    matchTime: "15:00",
-    league: "Premier League",
-    status: "pending",
+const statusConfig = {
+  pending: {
+    icon: Clock,
+    color: "text-muted-foreground",
+    bg: "bg-muted/50",
+    label: "Pending",
   },
-  {
-    id: "2",
-    homeTeam: "Barcelona",
-    awayTeam: "Real Madrid",
-    prediction: "BTTS",
-    odds: "1.72",
-    matchTime: "20:00",
-    league: "La Liga",
-    status: "pending",
+  won: {
+    icon: Check,
+    color: "text-success",
+    bg: "bg-success/10",
+    label: "Won",
   },
-  {
-    id: "3",
-    homeTeam: "Bayern Munich",
-    awayTeam: "Dortmund",
-    prediction: "Home Win",
-    odds: "1.65",
-    matchTime: "17:30",
-    league: "Bundesliga",
-    status: "won",
+  lost: {
+    icon: X,
+    color: "text-destructive",
+    bg: "bg-destructive/10",
+    label: "Lost",
   },
-  {
-    id: "4",
-    homeTeam: "PSG",
-    awayTeam: "Lyon",
-    prediction: "Over 1.5",
-    odds: "1.35",
-    matchTime: "21:00",
-    league: "Ligue 1",
-    status: "pending",
+  void: {
+    icon: Minus,
+    color: "text-muted-foreground",
+    bg: "bg-muted/30",
+    label: "Void",
   },
-];
+};
 
 const FreeTipsPage = () => {
-  const [view, setView] = useState<"categories" | "tips">("categories");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const handleCategoryClick = (title: string) => {
-    setSelectedCategory(title);
-    setView("tips");
-  };
+  const [searchParams] = useSearchParams();
+  const categorySlug = searchParams.get("category");
+  
+  const { data: tips, isLoading: tipsLoading } = useFreeTips(categorySlug || undefined);
+  const { data: categories } = useTipCategories();
+  
+  // Find the current category name
+  const currentCategory = categories?.find(c => c.slug === categorySlug);
+  const categoryName = currentCategory?.name || "Tips";
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-        {/* Header */}
+      <div className="px-4 py-6 space-y-4 max-w-lg mx-auto">
+        {/* Header with Back Button */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-1"
         >
-          <h1 className="text-2xl font-display font-bold">Free Tips</h1>
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="mb-2 -ml-2">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-xl font-display font-bold">{categoryName}</h1>
           <p className="text-sm text-muted-foreground">
-            Daily predictions across multiple categories
+            Today's predictions
           </p>
         </motion.div>
 
-        {/* View Toggle */}
-        <div className="flex gap-2">
-          <Button
-            variant={view === "categories" ? "default" : "secondary"}
-            size="sm"
-            onClick={() => setView("categories")}
-          >
-            Categories
-          </Button>
-          <Button
-            variant={view === "tips" ? "default" : "secondary"}
-            size="sm"
-            onClick={() => setView("tips")}
-          >
-            All Tips
-          </Button>
-        </div>
-
-        {/* Categories View */}
-        {view === "categories" && (
+        {/* Tips List */}
+        {tipsLoading ? (
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-40 rounded-xl bg-card/50 animate-pulse" />
+            ))}
+          </div>
+        ) : tips && tips.length > 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-3"
           >
-            {categories.map((category, i) => (
-              <div
-                key={category.title}
-                onClick={() => handleCategoryClick(category.title)}
-                className="cursor-pointer"
-              >
-                <CategoryCard
-                  title={category.title}
-                  description={category.description}
-                  icon={category.icon}
-                  href="#"
-                  count={category.count}
-                  index={i}
-                />
-              </div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Tips View */}
-        {view === "tips" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-4"
-          >
-            {selectedCategory && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Showing: <span className="text-foreground font-medium">{selectedCategory}</span>
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedCategory(null)}
+            {tips.map((tip, i) => {
+              const status = statusConfig[tip.status];
+              const StatusIcon = status.icon;
+              
+              return (
+                <motion.div
+                  key={tip.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                  className="glass-card rounded-xl p-4 space-y-3"
                 >
-                  Clear
-                </Button>
-              </div>
-            )}
-            
-            <div className="space-y-3">
-              {mockTips.map((tip, i) => (
-                <TipCard key={tip.id} tip={tip} index={i} />
-              ))}
+                  {/* League & Time */}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground font-medium">{tip.league}</span>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      <span>{tip.match_time}</span>
+                    </div>
+                  </div>
+
+                  {/* Teams */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
+                        H
+                      </div>
+                      <span className="font-medium">{tip.home_team}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">
+                        A
+                      </div>
+                      <span className="font-medium">{tip.away_team}</span>
+                    </div>
+                  </div>
+
+                  {/* Prediction & Odds */}
+                  <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Pick:</span>
+                      <span className="px-2 py-1 bg-primary/10 rounded-md text-primary font-semibold text-sm">
+                        {tip.prediction}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Odds:</span>
+                      <span className="font-bold text-lg">{tip.odds}</span>
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium",
+                      status.bg,
+                      status.color
+                    )}
+                  >
+                    <StatusIcon className="w-3.5 h-3.5" />
+                    <span>{status.label}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-12 text-center"
+          >
+            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <Trophy className="w-8 h-8 text-muted-foreground" />
             </div>
+            <h3 className="font-semibold text-lg mb-1">No Tips Available</h3>
+            <p className="text-sm text-muted-foreground">
+              Check back later for new predictions
+            </p>
           </motion.div>
         )}
       </div>
