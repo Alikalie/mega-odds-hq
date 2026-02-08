@@ -1,6 +1,6 @@
- import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
- import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   User,
   Settings,
@@ -13,18 +13,21 @@ import {
   HelpCircle,
   Crown,
   Star,
-   Loader2,
+  Loader2,
+  LayoutDashboard,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { UserBadge } from "@/components/ui/user-badge";
 import { Switch } from "@/components/ui/switch";
 import { AnnouncementCard, Announcement } from "@/components/cards/AnnouncementCard";
- import { useAuth } from "@/hooks/useAuth";
- import { supabase } from "@/integrations/supabase/client";
- import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const menuItems = [
+  { icon: LayoutDashboard, label: "My Dashboard", href: "/dashboard" },
   { icon: User, label: "Edit Profile", href: "/profile/edit" },
   { icon: Bell, label: "Notifications", href: "/profile/notifications" },
   { icon: Shield, label: "Privacy & Security", href: "/profile/security" },
@@ -32,9 +35,9 @@ const menuItems = [
 ];
 
 const ProfilePage = () => {
-   const navigate = useNavigate();
-   const { user, profile, isLoading, isAdmin, signOut } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const navigate = useNavigate();
+  const { user, profile, isLoading, isAdmin, signOut } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
  
    useEffect(() => {
@@ -197,14 +200,14 @@ const ProfilePage = () => {
           className="glass-card rounded-xl p-4 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
-            {isDarkMode ? (
+            {isDark ? (
               <Moon className="w-5 h-5 text-accent" />
             ) : (
               <Sun className="w-5 h-5 text-vip" />
             )}
             <span className="font-medium">Dark Mode</span>
           </div>
-          <Switch checked={isDarkMode} onCheckedChange={setIsDarkMode} />
+          <Switch checked={isDark} onCheckedChange={toggleTheme} />
         </motion.div>
 
         {/* Menu Items */}

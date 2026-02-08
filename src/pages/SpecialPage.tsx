@@ -1,56 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Star, Lock, Zap, Diamond, Sparkles, Rocket, Crown, Shield } from "lucide-react";
+import { Star, Lock, Zap, Diamond, Sparkles, Shield, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CategoryCard } from "@/components/cards/CategoryCard";
 import { TipCard, Tip } from "@/components/cards/TipCard";
 import { Button } from "@/components/ui/button";
-import { VipPackageCard } from "@/components/packages/VipPackageCard";
+import { SpecialPackageCard } from "@/components/packages/SpecialPackageCard";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-
-const specialCategories = [
-  { title: "Banker Tips", description: "Guaranteed safe picks", icon: Diamond, count: 4 },
-  { title: "High Stakes", description: "Maximum risk, maximum reward", icon: Zap, count: 2 },
-  { title: "Jackpot Combos", description: "Life-changing multiples", icon: Sparkles, count: 1 },
-  { title: "Exclusive Picks", description: "Hand-picked by experts", icon: Rocket, count: 3 },
-];
-
-const specialPackages = [
-  {
-    tier: "vip" as const,
-    title: "VIP Monthly",
-    price: "$49",
-    period: "month",
-    features: [
-      "Daily VIP predictions",
-      "80%+ accuracy rate",
-      "Priority support",
-      "VIP community access",
-    ],
-  },
-  {
-    tier: "special" as const,
-    title: "Special Package",
-    price: "$99",
-    period: "month",
-    isPopular: true,
-    features: [
-      "All VIP features included",
-      "High-stakes predictions",
-      "1-on-1 expert consultation",
-      "Personalized strategies",
-      "Early access to tips",
-      "100% Money-back guarantee",
-    ],
-  },
-];
+import { useSubscriptionPackages } from "@/hooks/useSubscriptionPackages";
 
 const SpecialPage = () => {
   const { isSpecial, isApproved, user } = useAuth();
-  const [view, setView] = useState<"categories" | "tips">("categories");
+  const { data: packages, isLoading: packagesLoading } = useSubscriptionPackages("special");
   const [tips, setTips] = useState<Tip[]>([]);
+  const [tipsLoading, setTipsLoading] = useState(false);
 
   useEffect(() => {
     if (isSpecial && isApproved) {
@@ -59,6 +23,7 @@ const SpecialPage = () => {
   }, [isSpecial, isApproved]);
 
   const fetchTips = async () => {
+    setTipsLoading(true);
     const { data } = await supabase
       .from("special_tips")
       .select("*")
@@ -77,6 +42,7 @@ const SpecialPage = () => {
         }))
       );
     }
+    setTipsLoading(false);
   };
 
   // Not logged in or not Special - Show packages
@@ -98,7 +64,7 @@ const SpecialPage = () => {
               Special <span className="text-special">Packages</span>
             </h1>
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-              Exclusive high-stakes predictions for serious bettors.
+              Exclusive high-stakes predictions for serious bettors. Choose your tier.
             </p>
           </motion.div>
 
@@ -115,9 +81,9 @@ const SpecialPage = () => {
             </h3>
             <div className="space-y-3">
               {[
-                { icon: Crown, text: "All VIP features included" },
-                { icon: Zap, text: "High-stakes exclusive picks" },
-                { icon: Diamond, text: "Personal betting advisor" },
+                { icon: Diamond, text: "Exclusive high-odds predictions" },
+                { icon: Zap, text: "Personal betting advisor" },
+                { icon: Sparkles, text: "Priority insider tips" },
                 { icon: Star, text: "Money-back guarantee" },
               ].map((benefit, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -130,14 +96,26 @@ const SpecialPage = () => {
             </div>
           </motion.div>
 
-          {/* Packages */}
+          {/* Packages Grid */}
           <div className="space-y-4">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Compare Packages
+              Choose Your Package
             </h2>
-            {specialPackages.map((pkg, i) => (
-              <VipPackageCard key={pkg.title} {...pkg} index={i} />
-            ))}
+            {packagesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-special" />
+              </div>
+            ) : packages && packages.length > 0 ? (
+              <div className="grid gap-4">
+                {packages.map((pkg, i) => (
+                  <SpecialPackageCard key={pkg.id} pkg={pkg} index={i} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No packages available at the moment
+              </p>
+            )}
           </div>
 
           {/* Login CTA */}
@@ -160,7 +138,7 @@ const SpecialPage = () => {
     );
   }
 
-  // Special User View
+  // Special User View - Show tips
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
@@ -178,59 +156,23 @@ const SpecialPage = () => {
           </p>
         </motion.div>
 
-        <div className="flex gap-2">
-          <Button
-            variant={view === "categories" ? "special" : "secondary"}
-            size="sm"
-            onClick={() => setView("categories")}
-          >
-            Categories
-          </Button>
-          <Button
-            variant={view === "tips" ? "special" : "secondary"}
-            size="sm"
-            onClick={() => setView("tips")}
-          >
-            All Tips
-          </Button>
-        </div>
-
-        {view === "categories" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-3"
-          >
-            {specialCategories.map((category, i) => (
-              <CategoryCard
-                key={category.title}
-                title={category.title}
-                description={category.description}
-                icon={category.icon}
-                href="#"
-                count={category.count}
-                variant="special"
-                index={i}
-              />
-            ))}
-          </motion.div>
-        )}
-
-        {view === "tips" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-3"
-          >
-            {tips.length > 0 ? (
-              tips.map((tip, i) => <TipCard key={tip.id} tip={tip} index={i} />)
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No Special tips available yet. Check back soon!
-              </p>
-            )}
-          </motion.div>
-        )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-3"
+        >
+          {tipsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-special" />
+            </div>
+          ) : tips.length > 0 ? (
+            tips.map((tip, i) => <TipCard key={tip.id} tip={tip} index={i} />)
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No Special tips available yet. Check back soon!
+            </p>
+          )}
+        </motion.div>
       </div>
     </AppLayout>
   );

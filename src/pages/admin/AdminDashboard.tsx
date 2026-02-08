@@ -23,9 +23,13 @@ import { cn } from "@/lib/utils";
  import { useAuth } from "@/hooks/useAuth";
  import { supabase } from "@/integrations/supabase/client";
 
+import { Package, CreditCard } from "lucide-react";
+
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: FileText, label: "Categories", href: "/admin/categories" },
+  { icon: Package, label: "Packages", href: "/admin/packages" },
+  { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: Trophy, label: "Free Tips", href: "/admin/free-tips" },
   { icon: Crown, label: "VIP Tips", href: "/admin/vip-tips" },

@@ -1,55 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Crown, Lock, Target, Percent, Flame, Gem, Sparkles } from "lucide-react";
+import { Crown, Lock, Sparkles, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { CategoryCard } from "@/components/cards/CategoryCard";
 import { TipCard, Tip } from "@/components/cards/TipCard";
 import { Button } from "@/components/ui/button";
 import { VipPackageCard } from "@/components/packages/VipPackageCard";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-
-const vipCategories = [
-  { title: "VIP 2 Odds", description: "Premium 2 odds picks", icon: Target, count: 8 },
-  { title: "VIP 5 Odds", description: "Curated 5 odds combos", icon: Percent, count: 5 },
-  { title: "VIP Hot Tips", description: "Expert insider picks", icon: Flame, count: 6 },
-  { title: "VIP Accumulators", description: "High-value multiples", icon: Gem, count: 3 },
-];
-
-const vipPackages = [
-  {
-    tier: "vip" as const,
-    title: "VIP Weekly",
-    price: "$15",
-    period: "week",
-    features: [
-      "Daily VIP predictions",
-      "80%+ accuracy rate",
-      "Betting strategies",
-      "Email notifications",
-    ],
-  },
-  {
-    tier: "vip" as const,
-    title: "VIP Monthly",
-    price: "$49",
-    period: "month",
-    isPopular: true,
-    features: [
-      "All weekly features",
-      "Priority support",
-      "VIP community access",
-      "Exclusive betting guides",
-      "Money-back guarantee",
-    ],
-  },
-];
+import { useSubscriptionPackages } from "@/hooks/useSubscriptionPackages";
 
 const VipPage = () => {
   const { isVip, isApproved, user } = useAuth();
-  const [view, setView] = useState<"categories" | "tips">("categories");
+  const { data: packages, isLoading: packagesLoading } = useSubscriptionPackages("vip");
   const [tips, setTips] = useState<Tip[]>([]);
+  const [tipsLoading, setTipsLoading] = useState(false);
 
   useEffect(() => {
     if (isVip && isApproved) {
@@ -58,6 +23,7 @@ const VipPage = () => {
   }, [isVip, isApproved]);
 
   const fetchTips = async () => {
+    setTipsLoading(true);
     const { data } = await supabase
       .from("vip_tips")
       .select("*")
@@ -76,6 +42,7 @@ const VipPage = () => {
         }))
       );
     }
+    setTipsLoading(false);
   };
 
   // Not logged in or not VIP - Show packages
@@ -132,9 +99,30 @@ const VipPage = () => {
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Choose Your Plan
             </h2>
-            {vipPackages.map((pkg, i) => (
-              <VipPackageCard key={pkg.title} {...pkg} index={i} />
-            ))}
+            {packagesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-vip" />
+              </div>
+            ) : packages && packages.length > 0 ? (
+              <div className="space-y-4">
+                {packages.map((pkg, i) => (
+                  <VipPackageCard
+                    key={pkg.id}
+                    tier="vip"
+                    title={pkg.name}
+                    price={`$${pkg.price}`}
+                    period={`${pkg.duration_days} days`}
+                    features={pkg.features}
+                    isPopular={pkg.is_popular}
+                    index={i}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No packages available at the moment
+              </p>
+            )}
           </div>
 
           {/* Login CTA */}
@@ -157,7 +145,7 @@ const VipPage = () => {
     );
   }
 
-  // VIP User View
+  // VIP User View - Show tips
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
@@ -175,59 +163,23 @@ const VipPage = () => {
           </p>
         </motion.div>
 
-        <div className="flex gap-2">
-          <Button
-            variant={view === "categories" ? "vip" : "secondary"}
-            size="sm"
-            onClick={() => setView("categories")}
-          >
-            Categories
-          </Button>
-          <Button
-            variant={view === "tips" ? "vip" : "secondary"}
-            size="sm"
-            onClick={() => setView("tips")}
-          >
-            All Tips
-          </Button>
-        </div>
-
-        {view === "categories" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-3"
-          >
-            {vipCategories.map((category, i) => (
-              <CategoryCard
-                key={category.title}
-                title={category.title}
-                description={category.description}
-                icon={category.icon}
-                href="#"
-                count={category.count}
-                variant="vip"
-                index={i}
-              />
-            ))}
-          </motion.div>
-        )}
-
-        {view === "tips" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-3"
-          >
-            {tips.length > 0 ? (
-              tips.map((tip, i) => <TipCard key={tip.id} tip={tip} index={i} />)
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No VIP tips available yet. Check back soon!
-              </p>
-            )}
-          </motion.div>
-        )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-3"
+        >
+          {tipsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-vip" />
+            </div>
+          ) : tips.length > 0 ? (
+            tips.map((tip, i) => <TipCard key={tip.id} tip={tip} index={i} />)
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No VIP tips available yet. Check back soon!
+            </p>
+          )}
+        </motion.div>
       </div>
     </AppLayout>
   );
