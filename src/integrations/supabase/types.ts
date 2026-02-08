@@ -191,6 +191,51 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_packages: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          duration_days: number
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          name: string
+          price: number
+          slug: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          duration_days?: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name: string
+          price: number
+          slug: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          duration_days?: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name?: string
+          price?: number
+          slug?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tip_categories: {
         Row: {
           created_at: string
@@ -256,6 +301,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          package_id: string
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          package_id: string
+          starts_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          package_id?: string
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vip_tips: {
         Row: {

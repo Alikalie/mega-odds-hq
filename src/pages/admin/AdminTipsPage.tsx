@@ -30,12 +30,14 @@ import {
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTipCategories } from "@/hooks/useTipCategories";
 
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
 }
 
 const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
+  const { data: categories } = useTipCategories();
   const [tips, setTips] = useState<Tip[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -296,11 +298,17 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="2-odds">2 Odds Daily</SelectItem>
-                      <SelectItem value="5-odds">5 Odds Daily</SelectItem>
-                      <SelectItem value="10-odds">10 Odds Daily</SelectItem>
-                      <SelectItem value="btts">BTTS</SelectItem>
-                      <SelectItem value="over-under">Over/Under</SelectItem>
+                      {categories
+                        ?.filter((c) => 
+                          tipType === "free" ? !c.is_vip && !c.is_special :
+                          tipType === "vip" ? c.is_vip :
+                          c.is_special
+                        )
+                        .map((cat) => (
+                          <SelectItem key={cat.id} value={cat.slug}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
