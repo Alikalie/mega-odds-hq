@@ -20,6 +20,9 @@ import AdminAppInfoPage from "./pages/admin/AdminAppInfoPage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminPackagesPage from "./pages/admin/AdminPackagesPage";
 import AdminSubscriptionsPage from "./pages/admin/AdminSubscriptionsPage";
+import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage";
+import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
+import AdminRolesPage from "./pages/admin/AdminRolesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +55,9 @@ const App = () => (
             <Route path="/admin/vip-tips" element={<AdminTipsPage tipType="vip" />} />
             <Route path="/admin/special-tips" element={<AdminTipsPage tipType="special" />} />
             <Route path="/admin/announcements" element={<AdminAnnouncementsPage />} />
+            <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+            <Route path="/admin/roles" element={<AdminRolesPage />} />
             <Route path="/admin/app-info" element={<AdminAppInfoPage />} />
             
             {/* Catch-all */}

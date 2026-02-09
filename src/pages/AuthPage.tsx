@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countries, packageTypes } from "@/lib/countries";
+import { PaymentDialog } from "@/components/dialogs/PaymentDialog";
 
 type AuthMode = "login" | "register";
 
@@ -38,11 +39,12 @@ const AuthPage = () => {
     fullName: "",
     confirmPassword: "",
     phoneNumber: "",
-    countryCode: "+234",
-    country: "Nigeria",
+    countryCode: "+232",
+    country: "Sierra Leone",
     packageType: searchParams.get("package") || "free",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -133,7 +135,12 @@ const AuthPage = () => {
           }
         } else {
           toast.success("Account created! Please check your email to verify your account.");
-          navigate("/pending-approval");
+          // Show payment dialog for non-free packages
+          if (formData.packageType !== "free") {
+            setShowPaymentDialog(true);
+          } else {
+            navigate("/pending-approval");
+          }
         }
       }
     } catch (err) {
@@ -416,6 +423,19 @@ const AuthPage = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Payment Dialog */}
+      <PaymentDialog
+        open={showPaymentDialog}
+        onOpenChange={(open) => {
+          setShowPaymentDialog(open);
+          if (!open) {
+            navigate("/pending-approval");
+          }
+        }}
+        isSierraLeone={formData.country === "Sierra Leone"}
+        packageName={packageTypes.find(p => p.id === formData.packageType)?.name}
+      />
     </div>
   );
 };
