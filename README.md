@@ -1,73 +1,102 @@
-# Welcome to your Lovable project
+# Mega Odds - Expert Tips & Predictions Platform
 
-## Project info
+**Your premier destination for expert sports tips, VIP predictions, and winning strategies.**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 Follow these steps:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/Alikalie/mega-odds-hq.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd mega-odds-hq
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install dependencies using bun or npm
+bun install
+# or
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
+bun run dev
+# or
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📋 Available Scripts
 
-**Use GitHub Codespaces**
+```sh
+bun run dev       # Start development server
+bun run build     # Build for production
+bun run lint      # Run ESLint
+bun run test      # Run tests
+bun run test:watch # Run tests in watch mode
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## 🛠️ Technologies
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: React 19 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS + shadcn-ui
+- **State Management**: React Query
+- **Forms**: React Hook Form + Zod
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Testing**: Vitest
+- **Package Manager**: Bun
 
-## How can I deploy this project?
+## 📁 Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```
+src/
+├── components/       # Reusable UI components
+│   ├── admin/       # Admin dashboard components
+│   ├── cards/       # Card components
+│   ├── dialogs/     # Modal/dialog components
+│   ├── dashboard/   # User dashboard components
+│   ├── layout/      # Layout components
+│   └── ui/          # Shadcn/ui components
+├── pages/           # Page components
+│   ├── admin/       # Admin pages
+│   └── user pages   # User-facing pages
+├── hooks/           # Custom React hooks
+├── lib/             # Utility functions
+└── integrations/    # External service integrations
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 🔐 Features
 
-Yes, you can!
+- **User Authentication**: Secure login with Supabase
+- **Free Tips**: Public sports predictions
+- **VIP Membership**: Premium tips and predictions
+- **Special Packages**: Exclusive packages and bundles
+- **Admin Dashboard**: Comprehensive management system
+- **User Profiles**: Personalized user settings
+- **Notifications**: Real-time updates and alerts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🚢 Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project can be deployed to any static hosting service:
+
+- **Vercel**: `vercel deploy`
+- **Netlify**: `netlify deploy`
+- **Others**: Build with `npm run build` and deploy the `dist` folder
+
+## 📝 Environment Setup
+
+Create a `.env.local` file in the root directory with your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+## 📄 License
+
+This project is proprietary. All rights reserved © 2026 Mega Odds.
