@@ -1,4 +1,5 @@
 export const countries = [
+  { name: "Sierra Leone", code: "SL", dial: "+232" },
   { name: "Nigeria", code: "NG", dial: "+234" },
   { name: "Ghana", code: "GH", dial: "+233" },
   { name: "Kenya", code: "KE", dial: "+254" },
