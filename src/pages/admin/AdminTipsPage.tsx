@@ -149,6 +149,26 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
         category: "",
       });
       toast.success("Tip added successfully");
+
+      // Send push notification to all users about new odds
+      try {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("status", "approved");
+        
+        if (profiles && profiles.length > 0) {
+          const notifications = profiles.map((p) => ({
+            user_id: p.id,
+            title: "🔥 New Odds Available!",
+            message: `New ${config.title.slice(0, -1)} posted: ${newTip.homeTeam} vs ${newTip.awayTeam} (${newTip.prediction} @ ${newTip.odds})`,
+          }));
+          await supabase.from("notifications").insert(notifications);
+        }
+      } catch (notifErr) {
+        console.error("Error sending notifications:", notifErr);
+      }
+
     } catch (err) {
       console.error("Error adding tip:", err);
       toast.error("Failed to add tip");
