@@ -24,6 +24,10 @@ import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
 import AdminRolesPage from "./pages/admin/AdminRolesPage";
 import NotFound from "./pages/NotFound";
+import HelpSupportPage from "./pages/profile/HelpSupportPage";
+import PrivacySecurityPage from "./pages/profile/PrivacySecurityPage";
+import EditProfilePage from "./pages/profile/EditProfilePage";
+import AdminPrivacySecurityPage from "./pages/admin/AdminPrivacySecurityPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +45,9 @@ const App = () => (
             <Route path="/vip" element={<VipPage />} />
             <Route path="/special" element={<SpecialPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/edit" element={<EditProfilePage />} />
+            <Route path="/profile/help" element={<HelpSupportPage />} />
+            <Route path="/profile/security" element={<PrivacySecurityPage />} />
             <Route path="/dashboard" element={<UserDashboardPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/pending-approval" element={<PendingApprovalPage />} />
@@ -59,6 +66,7 @@ const App = () => (
             <Route path="/admin/payments" element={<AdminPaymentsPage />} />
             <Route path="/admin/roles" element={<AdminRolesPage />} />
             <Route path="/admin/app-info" element={<AdminAppInfoPage />} />
+            <Route path="/admin/privacy-security" element={<AdminPrivacySecurityPage />} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
