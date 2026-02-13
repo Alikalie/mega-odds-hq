@@ -173,6 +173,36 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_security: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

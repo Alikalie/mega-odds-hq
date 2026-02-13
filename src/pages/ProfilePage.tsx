@@ -97,8 +97,12 @@ const ProfilePage = () => {
            {user && profile ? (
              <>
                <div className="flex items-center gap-4">
-                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                   {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()
+                    )}
                  </div>
                  <div className="flex-1">
                    <h2 className="font-display font-bold text-lg">

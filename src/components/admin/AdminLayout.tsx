@@ -40,6 +40,7 @@ const sidebarItems = [
   { icon: Wallet, label: "Payments", href: "/admin/payments" },
   { icon: Shield, label: "Admin Roles", href: "/admin/roles" },
   { icon: Info, label: "App Info", href: "/admin/app-info" },
+  { icon: Shield, label: "Privacy & Security", href: "/admin/privacy-security" },
 ];
 
 export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
