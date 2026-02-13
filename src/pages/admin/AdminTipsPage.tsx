@@ -150,18 +150,25 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
       });
       toast.success("Tip added successfully");
 
-      // Send push notification to all users about new odds
+      // Send push notification to relevant users based on tip type
       try {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("status", "approved");
+        let profileQuery = supabase.from("profiles").select("id").eq("status", "approved");
+        
+        if (tipType === "vip") {
+          profileQuery = profileQuery.in("subscription", ["vip", "special"]);
+        } else if (tipType === "special") {
+          profileQuery = profileQuery.eq("subscription", "special");
+        }
+        // For free tips, notify all approved users (no subscription filter)
+
+        const { data: profiles } = await profileQuery;
         
         if (profiles && profiles.length > 0) {
+          const emoji = tipType === "free" ? "⚽" : tipType === "vip" ? "👑" : "⭐";
           const notifications = profiles.map((p) => ({
             user_id: p.id,
-            title: "🔥 New Odds Available!",
-            message: `New ${config.title.slice(0, -1)} posted: ${newTip.homeTeam} vs ${newTip.awayTeam} (${newTip.prediction} @ ${newTip.odds})`,
+            title: `${emoji} New ${config.title} Available!`,
+            message: `${newTip.homeTeam} vs ${newTip.awayTeam} — ${newTip.prediction} @ ${newTip.odds}`,
           }));
           await supabase.from("notifications").insert(notifications);
         }
