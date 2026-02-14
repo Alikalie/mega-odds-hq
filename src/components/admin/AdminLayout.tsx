@@ -17,6 +17,7 @@ import {
   Shield,
   Wallet,
   Send,
+  ArrowUpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ const sidebarItems = [
   { icon: Bell, label: "Announcements", href: "/admin/announcements" },
   { icon: Send, label: "Notifications", href: "/admin/notifications" },
   { icon: Wallet, label: "Payments", href: "/admin/payments" },
+  { icon: ArrowUpCircle, label: "Upgrade Requests", href: "/admin/upgrade-requests" },
   { icon: Shield, label: "Admin Roles", href: "/admin/roles" },
   { icon: Info, label: "App Info", href: "/admin/app-info" },
   { icon: Shield, label: "Privacy & Security", href: "/admin/privacy-security" },
