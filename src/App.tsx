@@ -28,6 +28,7 @@ import HelpSupportPage from "./pages/profile/HelpSupportPage";
 import PrivacySecurityPage from "./pages/profile/PrivacySecurityPage";
 import EditProfilePage from "./pages/profile/EditProfilePage";
 import AdminPrivacySecurityPage from "./pages/admin/AdminPrivacySecurityPage";
+import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/admin/roles" element={<AdminRolesPage />} />
             <Route path="/admin/app-info" element={<AdminAppInfoPage />} />
             <Route path="/admin/privacy-security" element={<AdminPrivacySecurityPage />} />
+            <Route path="/admin/upgrade-requests" element={<AdminUpgradeRequestsPage />} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

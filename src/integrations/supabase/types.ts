@@ -413,6 +413,68 @@ export type Database = {
         }
         Relationships: []
       }
+      upgrade_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          current_tier: string
+          id: string
+          payment_proof_url: string | null
+          requested_package_id: string | null
+          requested_package_name: string | null
+          requested_tier: string
+          status: string
+          updated_at: string
+          user_country: string | null
+          user_email: string
+          user_id: string
+          user_name: string | null
+          user_phone: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          current_tier?: string
+          id?: string
+          payment_proof_url?: string | null
+          requested_package_id?: string | null
+          requested_package_name?: string | null
+          requested_tier: string
+          status?: string
+          updated_at?: string
+          user_country?: string | null
+          user_email: string
+          user_id: string
+          user_name?: string | null
+          user_phone?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          current_tier?: string
+          id?: string
+          payment_proof_url?: string | null
+          requested_package_id?: string | null
+          requested_package_name?: string | null
+          requested_tier?: string
+          status?: string
+          updated_at?: string
+          user_country?: string | null
+          user_email?: string
+          user_id?: string
+          user_name?: string | null
+          user_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upgrade_requests_requested_package_id_fkey"
+            columns: ["requested_package_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

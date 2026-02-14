@@ -115,6 +115,7 @@ const VipPage = () => {
                     features={pkg.features}
                     isPopular={pkg.is_popular}
                     index={i}
+                    packageId={pkg.id}
                   />
                 ))}
               </div>

@@ -6,16 +6,19 @@
  type SubscriptionTier = "free" | "vip" | "special";
  type UserRole = "user" | "admin";
  
- interface Profile {
-   id: string;
-   email: string;
-   full_name: string | null;
-   avatar_url: string | null;
-   subscription: SubscriptionTier;
-   status: UserStatus;
-   created_at: string;
-   updated_at: string;
- }
+  interface Profile {
+    id: string;
+    email: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    phone_number: string | null;
+    country: string | null;
+    country_code: string | null;
+    subscription: SubscriptionTier;
+    status: UserStatus;
+    created_at: string;
+    updated_at: string;
+  }
  
  interface AuthContextType {
    user: User | null;
