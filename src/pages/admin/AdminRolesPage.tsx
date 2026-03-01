@@ -36,7 +36,7 @@ import { useAuth } from "@/hooks/useAuth";
 interface UserRole {
   id: string;
   user_id: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "super_admin";
   created_at: string;
 }
 

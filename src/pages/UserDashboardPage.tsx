@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserSubscriptions } from "@/hooks/useSubscriptionPackages";
+import { useTipCategories } from "@/hooks/useTipCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { Tip } from "@/components/cards/TipCard";
 import { Link, Navigate } from "react-router-dom";
@@ -15,6 +16,7 @@ import { format, isToday, isYesterday, parseISO } from "date-fns";
 
 interface TipWithDate extends Tip {
   createdAt: string;
+  category: string;
 }
 
 const getDateLabel = (dateStr: string) => {
@@ -41,21 +43,27 @@ const groupTipsByDate = (tips: TipWithDate[]) => {
 const UserDashboardPage = () => {
   const { user, profile, isLoading: authLoading, isApproved, isVip, isSpecial } = useAuth();
   const { data: subscriptions, isLoading: subsLoading } = useUserSubscriptions(user?.id);
+  const { data: categories } = useTipCategories();
 
   const [freeTips, setFreeTips] = useState<TipWithDate[]>([]);
   const [vipTips, setVipTips] = useState<TipWithDate[]>([]);
   const [specialTips, setSpecialTips] = useState<TipWithDate[]>([]);
   const [tipsLoading, setTipsLoading] = useState(true);
+  const [activeFreeCategory, setActiveFreeCategory] = useState("all");
+  const [activeVipCategory, setActiveVipCategory] = useState("all");
+  const [activeSpecialCategory, setActiveSpecialCategory] = useState("all");
 
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 1);
   twoDaysAgo.setHours(0, 0, 0, 0);
 
+  const freeCategories = categories?.filter((c) => !c.is_vip && !c.is_special) || [];
+  const vipCategories = categories?.filter((c) => c.is_vip) || [];
+  const specialCategories = categories?.filter((c) => c.is_special) || [];
+
   useEffect(() => {
     if (user) {
       fetchTips();
-
-      // Realtime subscriptions
       const channels = [
         supabase.channel("dash-free").on("postgres_changes", { event: "*", schema: "public", table: "free_tips" }, () => fetchTips()).subscribe(),
         supabase.channel("dash-vip").on("postgres_changes", { event: "*", schema: "public", table: "vip_tips" }, () => fetchTips()).subscribe(),
@@ -76,33 +84,22 @@ const UserDashboardPage = () => {
       league: t.league,
       status: t.status as Tip["status"],
       createdAt: t.created_at,
+      category: t.category,
     }));
 
   const fetchTips = async () => {
     setTipsLoading(true);
     try {
-      const { data: free } = await supabase
-        .from("free_tips")
-        .select("*")
-        .gte("created_at", twoDaysAgo.toISOString())
-        .order("created_at", { ascending: false });
+      const { data: free } = await supabase.from("free_tips").select("*").gte("created_at", twoDaysAgo.toISOString()).order("created_at", { ascending: false });
       if (free) setFreeTips(mapTips(free));
 
       if (isVip) {
-        const { data: vip } = await supabase
-          .from("vip_tips")
-          .select("*")
-          .gte("created_at", twoDaysAgo.toISOString())
-          .order("created_at", { ascending: false });
+        const { data: vip } = await supabase.from("vip_tips").select("*").gte("created_at", twoDaysAgo.toISOString()).order("created_at", { ascending: false });
         if (vip) setVipTips(mapTips(vip));
       }
 
       if (isSpecial) {
-        const { data: special } = await supabase
-          .from("special_tips")
-          .select("*")
-          .gte("created_at", twoDaysAgo.toISOString())
-          .order("created_at", { ascending: false });
+        const { data: special } = await supabase.from("special_tips").select("*").gte("created_at", twoDaysAgo.toISOString()).order("created_at", { ascending: false });
         if (special) setSpecialTips(mapTips(special));
       }
     } catch (err) {
@@ -117,9 +114,8 @@ const UserDashboardPage = () => {
   }
   if (!user) return <Navigate to="/auth" replace />;
 
-  const groupedFree = groupTipsByDate(freeTips);
-  const groupedVip = groupTipsByDate(vipTips);
-  const groupedSpecial = groupTipsByDate(specialTips);
+  const filterByCategory = (tips: TipWithDate[], activeCategory: string) =>
+    activeCategory === "all" ? tips : tips.filter((t) => t.category === activeCategory);
 
   return (
     <AppLayout showInfo={false}>
@@ -160,15 +156,82 @@ const UserDashboardPage = () => {
               {isVip && <TabsTrigger value="vip" className="flex-1"><Crown className="w-4 h-4 mr-1" />VIP ({vipTips.length})</TabsTrigger>}
               {isSpecial && <TabsTrigger value="special" className="flex-1"><Star className="w-4 h-4 mr-1" />Special ({specialTips.length})</TabsTrigger>}
             </TabsList>
-            <TabsContent value="free" className="mt-4">
-              <DateGroupedTips groups={groupedFree} isLoading={tipsLoading} />
+
+            {/* Free Tips Tab */}
+            <TabsContent value="free" className="mt-4 space-y-4">
+              <CategoryTabs
+                categories={freeCategories}
+                activeCategory={activeFreeCategory}
+                onCategoryChange={setActiveFreeCategory}
+                tips={freeTips}
+              />
+              <DateGroupedTips groups={groupTipsByDate(filterByCategory(freeTips, activeFreeCategory))} isLoading={tipsLoading} />
             </TabsContent>
-            {isVip && <TabsContent value="vip" className="mt-4"><DateGroupedTips groups={groupedVip} isLoading={tipsLoading} /></TabsContent>}
-            {isSpecial && <TabsContent value="special" className="mt-4"><DateGroupedTips groups={groupedSpecial} isLoading={tipsLoading} /></TabsContent>}
+
+            {/* VIP Tips Tab */}
+            {isVip && (
+              <TabsContent value="vip" className="mt-4 space-y-4">
+                <CategoryTabs
+                  categories={vipCategories}
+                  activeCategory={activeVipCategory}
+                  onCategoryChange={setActiveVipCategory}
+                  tips={vipTips}
+                />
+                <DateGroupedTips groups={groupTipsByDate(filterByCategory(vipTips, activeVipCategory))} isLoading={tipsLoading} />
+              </TabsContent>
+            )}
+
+            {/* Special Tips Tab */}
+            {isSpecial && (
+              <TabsContent value="special" className="mt-4 space-y-4">
+                <CategoryTabs
+                  categories={specialCategories}
+                  activeCategory={activeSpecialCategory}
+                  onCategoryChange={setActiveSpecialCategory}
+                  tips={specialTips}
+                />
+                <DateGroupedTips groups={groupTipsByDate(filterByCategory(specialTips, activeSpecialCategory))} isLoading={tipsLoading} />
+              </TabsContent>
+            )}
           </Tabs>
         </motion.section>
       </div>
     </AppLayout>
+  );
+};
+
+const CategoryTabs = ({ categories, activeCategory, onCategoryChange, tips }: {
+  categories: { slug: string; name: string }[];
+  activeCategory: string;
+  onCategoryChange: (cat: string) => void;
+  tips: TipWithDate[];
+}) => {
+  if (categories.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button
+        size="sm"
+        variant={activeCategory === "all" ? "default" : "outline"}
+        onClick={() => onCategoryChange("all")}
+        className="h-8 text-xs"
+      >
+        All ({tips.length})
+      </Button>
+      {categories.map((cat) => {
+        const count = tips.filter((t) => t.category === cat.slug).length;
+        return (
+          <Button
+            key={cat.slug}
+            size="sm"
+            variant={activeCategory === cat.slug ? "default" : "outline"}
+            onClick={() => onCategoryChange(cat.slug)}
+            className="h-8 text-xs"
+          >
+            {cat.name} ({count})
+          </Button>
+        );
+      })}
+    </div>
   );
 };
 

@@ -4,7 +4,7 @@
  
  type UserStatus = "pending" | "approved" | "blocked";
  type SubscriptionTier = "free" | "vip" | "special";
- type UserRole = "user" | "admin";
+ type UserRole = "user" | "admin" | "super_admin";
  
   interface Profile {
     id: string;
@@ -26,10 +26,11 @@
    profile: Profile | null;
    role: UserRole;
    isLoading: boolean;
-   isAdmin: boolean;
-   isApproved: boolean;
-   isVip: boolean;
-   isSpecial: boolean;
+    isAdmin: boolean;
+    isSuperAdmin: boolean;
+    isApproved: boolean;
+    isVip: boolean;
+    isSpecial: boolean;
   signUp: (
     email: string,
     password: string,
@@ -86,10 +87,11 @@
          return;
        }
  
-       if (data && data.length > 0) {
-         const isAdmin = data.some((r) => r.role === "admin");
-         setRole(isAdmin ? "admin" : "user");
-       }
+      if (data && data.length > 0) {
+          const isSuperAdmin = data.some((r) => r.role === "super_admin");
+          const isAdmin = data.some((r) => r.role === "admin");
+          setRole(isSuperAdmin ? "super_admin" : isAdmin ? "admin" : "user");
+        }
      } catch (err) {
        console.error("Error in fetchRole:", err);
      }
@@ -182,8 +184,9 @@
      setRole("user");
    };
  
-   const isAdmin = role === "admin";
-   const isApproved = profile?.status === "approved";
+    const isAdmin = role === "admin" || role === "super_admin";
+    const isSuperAdmin = role === "super_admin";
+    const isApproved = profile?.status === "approved";
    const isVip = profile?.subscription === "vip" || profile?.subscription === "special";
    const isSpecial = profile?.subscription === "special";
  
@@ -195,8 +198,9 @@
          profile,
          role,
          isLoading,
-         isAdmin,
-         isApproved,
+          isAdmin,
+          isSuperAdmin,
+          isApproved,
          isVip,
          isSpecial,
          signUp,
