@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -50,7 +51,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
     odds: "",
     matchTime: "",
     league: "",
-    category: "",
+    categories: [] as string[],
   });
 
   const typeConfig = {
@@ -107,37 +108,42 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (newTip.categories.length === 0) {
+      toast.error("Please select at least one category");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
+      const insertRows = newTip.categories.map((cat) => ({
+        home_team: newTip.homeTeam,
+        away_team: newTip.awayTeam,
+        prediction: newTip.prediction,
+        odds: newTip.odds,
+        match_time: newTip.matchTime || "TBD",
+        league: newTip.league || "Unknown",
+        category: cat,
+      }));
+
       const { data, error } = await supabase
         .from(config.table)
-        .insert({
-          home_team: newTip.homeTeam,
-          away_team: newTip.awayTeam,
-          prediction: newTip.prediction,
-          odds: newTip.odds,
-          match_time: newTip.matchTime || "TBD",
-          league: newTip.league || "Unknown",
-          category: newTip.category || "general",
-        })
-        .select()
-        .single();
+        .insert(insertRows)
+        .select();
 
       if (error) throw error;
 
-      const formattedTip: Tip = {
-        id: data.id,
-        homeTeam: data.home_team,
-        awayTeam: data.away_team,
-        prediction: data.prediction,
-        odds: data.odds,
-        matchTime: data.match_time,
-        league: data.league,
-        status: data.status as Tip["status"],
-      };
+      const formattedTips: Tip[] = (data || []).map((d) => ({
+        id: d.id,
+        homeTeam: d.home_team,
+        awayTeam: d.away_team,
+        prediction: d.prediction,
+        odds: d.odds,
+        matchTime: d.match_time,
+        league: d.league,
+        status: d.status as Tip["status"],
+      }));
 
-      setTips((prev) => [formattedTip, ...prev]);
+      setTips((prev) => [...formattedTips, ...prev]);
       setIsAddDialogOpen(false);
       setNewTip({
         homeTeam: "",
@@ -146,23 +152,19 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
         odds: "",
         matchTime: "",
         league: "",
-        category: "",
+        categories: [],
       });
-      toast.success("Tip added successfully");
+      toast.success(`Tip added to ${newTip.categories.length} category(ies)`);
 
-      // Send push notification to relevant users based on tip type
+      // Send push notification
       try {
         let profileQuery = supabase.from("profiles").select("id").eq("status", "approved");
-        
         if (tipType === "vip") {
           profileQuery = profileQuery.in("subscription", ["vip", "special"]);
         } else if (tipType === "special") {
           profileQuery = profileQuery.eq("subscription", "special");
         }
-        // For free tips, notify all approved users (no subscription filter)
-
         const { data: profiles } = await profileQuery;
-        
         if (profiles && profiles.length > 0) {
           const emoji = tipType === "free" ? "⚽" : tipType === "vip" ? "👑" : "⭐";
           const notifications = profiles.map((p) => ({
@@ -175,7 +177,6 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
       } catch (notifErr) {
         console.error("Error sending notifications:", notifErr);
       }
-
     } catch (err) {
       console.error("Error adding tip:", err);
       toast.error("Failed to add tip");
@@ -313,31 +314,42 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Category</Label>
-                  <Select
-                    value={newTip.category}
-                    onValueChange={(value) =>
-                      setNewTip({ ...newTip, category: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories
-                        ?.filter((c) => 
-                          tipType === "free" ? !c.is_vip && !c.is_special :
-                          tipType === "vip" ? c.is_vip :
-                          c.is_special
-                        )
-                        .map((cat) => (
-                          <SelectItem key={cat.id} value={cat.slug}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-3">
+                  <Label>Categories (select up to 4)</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories
+                      ?.filter((c) =>
+                        tipType === "free" ? !c.is_vip && !c.is_special :
+                        tipType === "vip" ? c.is_vip :
+                        c.is_special
+                      )
+                      .map((cat) => {
+                        const isChecked = newTip.categories.includes(cat.slug);
+                        return (
+                          <label
+                            key={cat.id}
+                            className="flex items-center gap-2 p-2 rounded-lg border border-border hover:bg-secondary/50 cursor-pointer transition-colors"
+                          >
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                if (checked && newTip.categories.length >= 4) {
+                                  toast.error("Maximum 4 categories allowed");
+                                  return;
+                                }
+                                setNewTip({
+                                  ...newTip,
+                                  categories: checked
+                                    ? [...newTip.categories, cat.slug]
+                                    : newTip.categories.filter((s) => s !== cat.slug),
+                                });
+                              }}
+                            />
+                            <span className="text-sm">{cat.name}</span>
+                          </label>
+                        );
+                      })}
+                  </div>
                 </div>
                 <Button
                   className="w-full"
