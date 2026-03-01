@@ -29,6 +29,8 @@ import PrivacySecurityPage from "./pages/profile/PrivacySecurityPage";
 import EditProfilePage from "./pages/profile/EditProfilePage";
 import AdminPrivacySecurityPage from "./pages/admin/AdminPrivacySecurityPage";
 import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
+import { AdminGuard } from "@/components/guards/AdminGuard";
+import { SuperAdminGuard } from "@/components/guards/SuperAdminGuard";
 
 const queryClient = new QueryClient();
 
@@ -55,20 +57,20 @@ const App = () => (
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/categories" element={<AdminCategoriesPage />} />
-            <Route path="/admin/packages" element={<AdminPackagesPage />} />
-            <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+            <Route path="/admin/categories" element={<SuperAdminGuard><AdminCategoriesPage /></SuperAdminGuard>} />
+            <Route path="/admin/packages" element={<SuperAdminGuard><AdminPackagesPage /></SuperAdminGuard>} />
+            <Route path="/admin/subscriptions" element={<SuperAdminGuard><AdminSubscriptionsPage /></SuperAdminGuard>} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/free-tips" element={<AdminTipsPage tipType="free" />} />
             <Route path="/admin/vip-tips" element={<AdminTipsPage tipType="vip" />} />
             <Route path="/admin/special-tips" element={<AdminTipsPage tipType="special" />} />
             <Route path="/admin/announcements" element={<AdminAnnouncementsPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
-            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
-            <Route path="/admin/roles" element={<AdminRolesPage />} />
-            <Route path="/admin/app-info" element={<AdminAppInfoPage />} />
-            <Route path="/admin/privacy-security" element={<AdminPrivacySecurityPage />} />
-            <Route path="/admin/upgrade-requests" element={<AdminUpgradeRequestsPage />} />
+            <Route path="/admin/payments" element={<SuperAdminGuard><AdminPaymentsPage /></SuperAdminGuard>} />
+            <Route path="/admin/roles" element={<SuperAdminGuard><AdminRolesPage /></SuperAdminGuard>} />
+            <Route path="/admin/app-info" element={<SuperAdminGuard><AdminAppInfoPage /></SuperAdminGuard>} />
+            <Route path="/admin/privacy-security" element={<SuperAdminGuard><AdminPrivacySecurityPage /></SuperAdminGuard>} />
+            <Route path="/admin/upgrade-requests" element={<SuperAdminGuard><AdminUpgradeRequestsPage /></SuperAdminGuard>} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
