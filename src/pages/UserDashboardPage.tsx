@@ -13,6 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tip } from "@/components/cards/TipCard";
 import { Link, Navigate } from "react-router-dom";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
+import { useBookingCodes } from "@/hooks/useBookingCodes";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
+import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
 
 interface TipWithDate extends Tip {
   createdAt: string;
@@ -52,6 +55,12 @@ const UserDashboardPage = () => {
   const [activeFreeCategory, setActiveFreeCategory] = useState("all");
   const [activeVipCategory, setActiveVipCategory] = useState("all");
   const [activeSpecialCategory, setActiveSpecialCategory] = useState("all");
+
+  const { data: freeBookingCodes } = useBookingCodes("free");
+  const { data: vipBookingCodes } = useBookingCodes("vip");
+  const { data: specialBookingCodes } = useBookingCodes("special");
+  const { data: featureToggles } = useFeatureToggles();
+  const bookingCodesEnabled = featureToggles?.find((t) => t.feature_key === "booking_codes")?.is_enabled ?? false;
 
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 1);
@@ -165,6 +174,9 @@ const UserDashboardPage = () => {
                 onCategoryChange={setActiveFreeCategory}
                 tips={freeTips}
               />
+              {bookingCodesEnabled && (
+                <BookingCodesSection codes={freeBookingCodes} activeCategory={activeFreeCategory} />
+              )}
               <DateGroupedTips groups={groupTipsByDate(filterByCategory(freeTips, activeFreeCategory))} isLoading={tipsLoading} />
             </TabsContent>
 
@@ -177,6 +189,9 @@ const UserDashboardPage = () => {
                   onCategoryChange={setActiveVipCategory}
                   tips={vipTips}
                 />
+                {bookingCodesEnabled && (
+                  <BookingCodesSection codes={vipBookingCodes} activeCategory={activeVipCategory} />
+                )}
                 <DateGroupedTips groups={groupTipsByDate(filterByCategory(vipTips, activeVipCategory))} isLoading={tipsLoading} />
               </TabsContent>
             )}
@@ -190,6 +205,9 @@ const UserDashboardPage = () => {
                   onCategoryChange={setActiveSpecialCategory}
                   tips={specialTips}
                 />
+                {bookingCodesEnabled && (
+                  <BookingCodesSection codes={specialBookingCodes} activeCategory={activeSpecialCategory} />
+                )}
                 <DateGroupedTips groups={groupTipsByDate(filterByCategory(specialTips, activeSpecialCategory))} isLoading={tipsLoading} />
               </TabsContent>
             )}
@@ -250,6 +268,18 @@ const DateGroupedTips = ({ groups, isLoading }: { groups: Record<string, TipWith
           </div>
           <TipsTable tips={tips} />
         </div>
+      ))}
+    </div>
+  );
+};
+
+const BookingCodesSection = ({ codes, activeCategory }: { codes: import("@/hooks/useBookingCodes").BookingCode[] | undefined; activeCategory: string }) => {
+  const filtered = codes?.filter((c) => activeCategory === "all" || c.category_slug === activeCategory) || [];
+  if (filtered.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      {filtered.map((code) => (
+        <BookingCodeCard key={code.id} code={code} />
       ))}
     </div>
   );

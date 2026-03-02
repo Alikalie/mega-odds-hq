@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useBookingCodes } from "@/hooks/useBookingCodes";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
+import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
 
 const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
@@ -46,6 +49,9 @@ const FreeTipsPage = () => {
 
   const { data: tips, isLoading: tipsLoading } = useFreeTips(categorySlug || undefined);
   const { data: categories } = useTipCategories();
+  const { data: bookingCodes } = useBookingCodes("free");
+  const { data: featureToggles } = useFeatureToggles();
+  const bookingCodesEnabled = featureToggles?.find((t) => t.feature_key === "booking_codes")?.is_enabled ?? false;
 
   // Realtime subscription
   useEffect(() => {
@@ -62,7 +68,7 @@ const FreeTipsPage = () => {
   const categoryName = currentCategory?.name || "Tips";
 
   const grouped = tips ? groupTipsByDate(tips) : {};
-
+  const categoryBookingCodes = bookingCodes?.filter((c) => !categorySlug || c.category_slug === categorySlug) || [];
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-4 max-w-lg mx-auto">
@@ -71,6 +77,14 @@ const FreeTipsPage = () => {
           <h1 className="text-xl font-display font-bold">{categoryName}</h1>
           <p className="text-sm text-muted-foreground">Today's predictions</p>
         </motion.div>
+        {/* Booking Codes */}
+        {bookingCodesEnabled && categoryBookingCodes.length > 0 && (
+          <div className="space-y-2">
+            {categoryBookingCodes.map((code) => (
+              <BookingCodeCard key={code.id} code={code} />
+            ))}
+          </div>
+        )}
 
         {tipsLoading ? (
           <div className="space-y-3">{[...Array(4)].map((_, i) => (<div key={i} className="h-40 rounded-xl bg-card/50 animate-pulse" />))}</div>

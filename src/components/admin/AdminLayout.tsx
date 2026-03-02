@@ -18,6 +18,8 @@ import {
   Wallet,
   Send,
   ArrowUpCircle,
+  Code2,
+  Settings2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,6 +44,8 @@ const allSidebarItems = [
   { icon: Wallet, label: "Payments", href: "/admin/payments", superOnly: true },
   { icon: ArrowUpCircle, label: "Upgrade Requests", href: "/admin/upgrade-requests", superOnly: true },
   { icon: Shield, label: "Admin Roles", href: "/admin/roles", superOnly: true },
+  { icon: Code2, label: "Booking Codes", href: "/admin/booking-codes", superOnly: false },
+  { icon: Settings2, label: "Feature Toggles", href: "/admin/feature-toggles", superOnly: true },
   { icon: Info, label: "App Info", href: "/admin/app-info", superOnly: true },
   { icon: Shield, label: "Privacy & Security", href: "/admin/privacy-security", superOnly: true },
 ];

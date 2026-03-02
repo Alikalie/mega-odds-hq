@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { InfoDialog } from "@/components/dialogs/InfoDialog";
+import { AppDownloadPrompt } from "@/components/prompts/AppDownloadPrompt";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export const AppLayout = ({
       <main className="flex-1 pb-20">{children}</main>
       {showNav && <BottomNav />}
       <InfoDialog open={infoOpen} onOpenChange={setInfoOpen} />
+      <AppDownloadPrompt />
     </div>
   );
 };
