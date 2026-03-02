@@ -7,6 +7,10 @@ import {
   Crown,
   Star,
   Clock,
+  UserPlus,
+  Megaphone,
+  ArrowUpCircle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +18,15 @@ import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+
+interface Activity {
+  action: string;
+  detail: string;
+  time: string;
+  icon: typeof Users;
+  color: string;
+}
 
 const AdminDashboard = () => {
   const { profile } = useAuth();
@@ -23,9 +36,12 @@ const AdminDashboard = () => {
     specialMembers: 0,
     pendingApproval: 0,
   });
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchRecentActivities();
   }, []);
 
   const fetchStats = async () => {
@@ -44,6 +60,98 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchRecentActivities = async () => {
+    setLoadingActivities(true);
+    try {
+      // Fetch recent data from multiple tables in parallel
+      const [usersRes, freeTipsRes, vipTipsRes, specialTipsRes, announcementsRes, upgradeRes] =
+        await Promise.all([
+          supabase.from("profiles").select("email, created_at").order("created_at", { ascending: false }).limit(5),
+          supabase.from("free_tips").select("home_team, away_team, created_at").order("created_at", { ascending: false }).limit(3),
+          supabase.from("vip_tips").select("home_team, away_team, created_at").order("created_at", { ascending: false }).limit(3),
+          supabase.from("special_tips").select("home_team, away_team, created_at").order("created_at", { ascending: false }).limit(3),
+          supabase.from("announcements").select("title, created_at").order("created_at", { ascending: false }).limit(3),
+          supabase.from("upgrade_requests").select("user_email, requested_tier, status, created_at").order("created_at", { ascending: false }).limit(5),
+        ]);
+
+      const items: (Activity & { timestamp: Date })[] = [];
+
+      usersRes.data?.forEach((u) =>
+        items.push({
+          action: "New user registered",
+          detail: u.email,
+          time: formatDistanceToNow(new Date(u.created_at), { addSuffix: true }),
+          icon: UserPlus,
+          color: "text-primary",
+          timestamp: new Date(u.created_at),
+        })
+      );
+
+      freeTipsRes.data?.forEach((t) =>
+        items.push({
+          action: "Free tip added",
+          detail: `${t.home_team} vs ${t.away_team}`,
+          time: formatDistanceToNow(new Date(t.created_at), { addSuffix: true }),
+          icon: Trophy,
+          color: "text-primary",
+          timestamp: new Date(t.created_at),
+        })
+      );
+
+      vipTipsRes.data?.forEach((t) =>
+        items.push({
+          action: "VIP tip added",
+          detail: `${t.home_team} vs ${t.away_team}`,
+          time: formatDistanceToNow(new Date(t.created_at), { addSuffix: true }),
+          icon: Crown,
+          color: "text-vip",
+          timestamp: new Date(t.created_at),
+        })
+      );
+
+      specialTipsRes.data?.forEach((t) =>
+        items.push({
+          action: "Special tip added",
+          detail: `${t.home_team} vs ${t.away_team}`,
+          time: formatDistanceToNow(new Date(t.created_at), { addSuffix: true }),
+          icon: Star,
+          color: "text-special",
+          timestamp: new Date(t.created_at),
+        })
+      );
+
+      announcementsRes.data?.forEach((a) =>
+        items.push({
+          action: "Announcement posted",
+          detail: a.title,
+          time: formatDistanceToNow(new Date(a.created_at), { addSuffix: true }),
+          icon: Megaphone,
+          color: "text-accent",
+          timestamp: new Date(a.created_at),
+        })
+      );
+
+      upgradeRes.data?.forEach((r) =>
+        items.push({
+          action: `Upgrade request (${r.status})`,
+          detail: `${r.user_email} → ${r.requested_tier}`,
+          time: formatDistanceToNow(new Date(r.created_at), { addSuffix: true }),
+          icon: ArrowUpCircle,
+          color: "text-warning",
+          timestamp: new Date(r.created_at),
+        })
+      );
+
+      // Sort by timestamp descending, take top 10
+      items.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      setActivities(items.slice(0, 10));
+    } catch (err) {
+      console.error("Error fetching activities:", err);
+    } finally {
+      setLoadingActivities(false);
+    }
+  };
+
   const statsCards = [
     { title: "Total Users", value: stats.totalUsers.toString(), icon: Users },
     { title: "VIP Members", value: stats.vipMembers.toString(), icon: Crown },
@@ -56,16 +164,9 @@ const AdminDashboard = () => {
       <AdminLayout title="Dashboard">
         <div className="space-y-6">
           {/* Welcome */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <h2 className="text-2xl font-display font-bold">
-              Welcome back, Admin
-            </h2>
-            <p className="text-muted-foreground">
-              Here's what's happening with Mega Odds today.
-            </p>
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+            <h2 className="text-2xl font-display font-bold">Welcome back, Admin</h2>
+            <p className="text-muted-foreground">Here's what's happening with Mega Odds today.</p>
           </motion.div>
 
           {/* Stats Grid */}
@@ -114,68 +215,49 @@ const AdminDashboard = () => {
           </div>
 
           {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="glass-card rounded-xl p-6"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="glass-card rounded-xl p-6">
             <h3 className="font-display font-bold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <Button variant="outline" asChild>
-                <Link to="/admin/users">
-                  <Users className="w-4 h-4 mr-2" />
-                  Manage Users
-                </Link>
+                <Link to="/admin/users"><Users className="w-4 h-4 mr-2" />Manage Users</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/admin/free-tips">
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Add Free Tip
-                </Link>
+                <Link to="/admin/free-tips"><Trophy className="w-4 h-4 mr-2" />Add Free Tip</Link>
               </Button>
               <Button variant="vip" asChild>
-                <Link to="/admin/vip-tips">
-                  <Crown className="w-4 h-4 mr-2" />
-                  Add VIP Tip
-                </Link>
+                <Link to="/admin/vip-tips"><Crown className="w-4 h-4 mr-2" />Add VIP Tip</Link>
               </Button>
               <Button variant="special" asChild>
-                <Link to="/admin/special-tips">
-                  <Star className="w-4 h-4 mr-2" />
-                  Add Special Tip
-                </Link>
+                <Link to="/admin/special-tips"><Star className="w-4 h-4 mr-2" />Add Special Tip</Link>
               </Button>
             </div>
           </motion.div>
 
-          {/* Recent Activity */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="glass-card rounded-xl p-6"
-          >
+          {/* Recent Activity - Live Data */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="glass-card rounded-xl p-6">
             <h3 className="font-display font-bold mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              {[
-                { action: "New user registered", user: "john@example.com", time: "2 min ago" },
-                { action: "VIP tip added", user: "Admin", time: "15 min ago" },
-                { action: "User approved", user: "jane@example.com", time: "1 hour ago" },
-                { action: "Announcement posted", user: "Admin", time: "2 hours ago" },
-              ].map((activity, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.user}</p>
+            {loadingActivities ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : activities.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No recent activity</p>
+            ) : (
+              <div className="space-y-3">
+                {activities.map((activity, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <activity.icon className={cn("w-4 h-4 shrink-0", activity.color)} />
+                      <div>
+                        <p className="text-sm font-medium">{activity.action}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">{activity.detail}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{activity.time}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{activity.time}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       </AdminLayout>

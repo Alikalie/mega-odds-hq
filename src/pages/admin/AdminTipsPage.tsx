@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -8,6 +8,8 @@ import {
   Search,
   Clock,
   Loader2,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,11 +31,26 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTipCategories } from "@/hooks/useTipCategories";
+import { LEAGUES } from "@/lib/leagues";
+import { cn } from "@/lib/utils";
 
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
@@ -276,11 +293,42 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Match Time</Label>
-                      <Input placeholder="e.g., 15:00" value={newTip.matchTime} onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })} />
+                      <Input
+                        type="time"
+                        value={newTip.matchTime}
+                        onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>League</Label>
-                      <Input placeholder="e.g., Premier League" value={newTip.league} onChange={(e) => setNewTip({ ...newTip, league: e.target.value })} />
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                            {newTip.league || "Select league..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[280px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search leagues..." />
+                            <CommandList>
+                              <CommandEmpty>No league found.</CommandEmpty>
+                              <CommandGroup className="max-h-[200px] overflow-y-auto">
+                                {LEAGUES.map((league) => (
+                                  <CommandItem
+                                    key={league}
+                                    value={league}
+                                    onSelect={(val) => setNewTip({ ...newTip, league: val })}
+                                  >
+                                    <Check className={cn("mr-2 h-4 w-4", newTip.league === league ? "opacity-100" : "opacity-0")} />
+                                    {league}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                   <div className="space-y-3">
