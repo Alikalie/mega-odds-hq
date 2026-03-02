@@ -29,6 +29,8 @@ import PrivacySecurityPage from "./pages/profile/PrivacySecurityPage";
 import EditProfilePage from "./pages/profile/EditProfilePage";
 import AdminPrivacySecurityPage from "./pages/admin/AdminPrivacySecurityPage";
 import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
+import AdminBookingCodesPage from "./pages/admin/AdminBookingCodesPage";
+import AdminFeatureTogglesPage from "./pages/admin/AdminFeatureTogglesPage";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { SuperAdminGuard } from "@/components/guards/SuperAdminGuard";
 
@@ -71,6 +73,8 @@ const App = () => (
             <Route path="/admin/app-info" element={<SuperAdminGuard><AdminAppInfoPage /></SuperAdminGuard>} />
             <Route path="/admin/privacy-security" element={<SuperAdminGuard><AdminPrivacySecurityPage /></SuperAdminGuard>} />
             <Route path="/admin/upgrade-requests" element={<SuperAdminGuard><AdminUpgradeRequestsPage /></SuperAdminGuard>} />
+            <Route path="/admin/booking-codes" element={<AdminBookingCodesPage />} />
+            <Route path="/admin/feature-toggles" element={<SuperAdminGuard><AdminFeatureTogglesPage /></SuperAdminGuard>} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

@@ -49,7 +49,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTipCategories } from "@/hooks/useTipCategories";
-import { LEAGUES } from "@/lib/leagues";
+import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
 
 interface AdminTipsPageProps {
@@ -298,6 +298,11 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                         value={newTip.matchTime}
                         onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })}
                       />
+                      {newTip.matchTime && (
+                        <p className="text-[10px] text-muted-foreground">
+                          🇸🇱 SL/GMT: {newTip.matchTime} | Local: {newTip.matchTime}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label>League</Label>
@@ -316,12 +321,13 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                               <CommandGroup className="max-h-[200px] overflow-y-auto">
                                 {LEAGUES.map((league) => (
                                   <CommandItem
-                                    key={league}
-                                    value={league}
+                                    key={league.name}
+                                    value={league.name}
                                     onSelect={(val) => setNewTip({ ...newTip, league: val })}
                                   >
-                                    <Check className={cn("mr-2 h-4 w-4", newTip.league === league ? "opacity-100" : "opacity-0")} />
-                                    {league}
+                                    <Check className={cn("mr-2 h-4 w-4", newTip.league === league.name ? "opacity-100" : "opacity-0")} />
+                                    <span className="mr-1.5">{getFlagEmoji(league.countryCode)}</span>
+                                    {league.name}
                                   </CommandItem>
                                 ))}
                               </CommandGroup>

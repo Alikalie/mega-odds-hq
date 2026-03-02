@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_feature_access: {
+        Row: {
+          admin_id: string
+          created_at: string
+          feature_key: string
+          granted_by: string | null
+          id: string
+          is_granted: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          feature_key: string
+          granted_by?: string | null
+          id?: string
+          is_granted?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          feature_key?: string
+          granted_by?: string | null
+          id?: string
+          is_granted?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_at: string
@@ -59,6 +89,72 @@ export type Database = {
           title?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      booking_codes: {
+        Row: {
+          category_slug: string
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          tip_type: string
+          updated_at: string
+        }
+        Insert: {
+          category_slug: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          tip_type?: string
+          updated_at?: string
+        }
+        Update: {
+          category_slug?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          tip_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      feature_toggles: {
+        Row: {
+          created_at: string
+          description: string | null
+          feature_key: string
+          feature_name: string
+          id: string
+          is_enabled: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          feature_key: string
+          feature_name: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          feature_key?: string
+          feature_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string
         }
         Relationships: []
       }
