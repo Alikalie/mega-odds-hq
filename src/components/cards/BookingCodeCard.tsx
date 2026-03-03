@@ -9,6 +9,7 @@ const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
   won: { icon: Check, color: "text-green-600", bg: "bg-green-500/10", label: "Won ✅" },
   lost: { icon: X, color: "text-destructive", bg: "bg-destructive/10", label: "Lost ❌" },
+  void: { icon: X, color: "text-yellow-600", bg: "bg-yellow-500/10", label: "Void ⚠️" },
 };
 
 interface BookingCodeCardProps {

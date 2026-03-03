@@ -32,6 +32,7 @@ const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
   won: { icon: Check, color: "text-success", bg: "bg-success/10", label: "Won" },
   lost: { icon: X, color: "text-destructive", bg: "bg-destructive/10", label: "Lost" },
+  void: { icon: X, color: "text-warning", bg: "bg-warning/10", label: "Void" },
 };
 
 const AdminBookingCodesPage = () => {
@@ -219,7 +220,7 @@ const AdminBookingCodesPage = () => {
                     {/* Status buttons */}
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground mr-1">Set status:</span>
-                      {(["pending", "won", "lost"] as const).map((s) => {
+                      {(["pending", "won", "lost", "void"] as const).map((s) => {
                         const cfg = statusConfig[s];
                         return (
                           <Button
