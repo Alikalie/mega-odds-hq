@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash2, Copy, Loader2, Code2 } from "lucide-react";
+import { Plus, Trash2, Loader2, Code2, Check, X, Clock, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,10 +22,17 @@ import {
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useTipCategories } from "@/hooks/useTipCategories";
-import { useAllBookingCodes, useCreateBookingCode, useDeleteBookingCode } from "@/hooks/useBookingCodes";
+import { useAllBookingCodes, useCreateBookingCode, useDeleteBookingCode, useUpdateBookingCode } from "@/hooks/useBookingCodes";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureEnabled, useMyFeatureAccess } from "@/hooks/useFeatureToggles";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const statusConfig = {
+  pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
+  won: { icon: Check, color: "text-success", bg: "bg-success/10", label: "Won" },
+  lost: { icon: X, color: "text-destructive", bg: "bg-destructive/10", label: "Lost" },
+};
 
 const AdminBookingCodesPage = () => {
   const { user, isSuperAdmin } = useAuth();
@@ -32,9 +40,10 @@ const AdminBookingCodesPage = () => {
   const { data: codes, isLoading } = useAllBookingCodes();
   const createCode = useCreateBookingCode();
   const deleteCode = useDeleteBookingCode();
+  const updateCode = useUpdateBookingCode();
   const featureEnabled = useFeatureEnabled("booking_codes");
   const { data: myAccess } = useMyFeatureAccess(user?.id);
-  
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newCode, setNewCode] = useState({
     code: "",
@@ -43,7 +52,6 @@ const AdminBookingCodesPage = () => {
     tip_type: "free",
   });
 
-  // Check access: super admin always has access, regular admin needs grant
   const hasAccess = isSuperAdmin || myAccess?.some((a) => a.feature_key === "booking_codes" && a.is_granted);
 
   if (!featureEnabled && !isSuperAdmin) {
@@ -84,9 +92,19 @@ const AdminBookingCodesPage = () => {
       tip_type: newCode.tip_type,
       is_active: true,
       created_by: user?.id || null,
+      status: "pending",
+      admin_comment: null,
     });
     setDialogOpen(false);
     setNewCode({ code: "", description: "", category_slug: "", tip_type: "free" });
+  };
+
+  const handleStatusChange = (id: string, status: string) => {
+    updateCode.mutate({ id, status });
+  };
+
+  const handleCommentSave = (id: string, comment: string) => {
+    updateCode.mutate({ id, admin_comment: comment || null });
   };
 
   const allCategories = categories || [];
@@ -127,9 +145,7 @@ const AdminBookingCodesPage = () => {
                   <div className="space-y-2">
                     <Label>Tip Type</Label>
                     <Select value={newCode.tip_type} onValueChange={(v) => setNewCode({ ...newCode, tip_type: v })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="free">Free</SelectItem>
                         <SelectItem value="vip">VIP</SelectItem>
@@ -140,9 +156,7 @@ const AdminBookingCodesPage = () => {
                   <div className="space-y-2">
                     <Label>Category</Label>
                     <Select value={newCode.category_slug} onValueChange={(v) => setNewCode({ ...newCode, category_slug: v })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                       <SelectContent>
                         {allCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
@@ -167,34 +181,64 @@ const AdminBookingCodesPage = () => {
             <div className="space-y-3">
               {codes.map((code, i) => {
                 const cat = allCategories.find((c) => c.slug === code.category_slug);
+                const st = statusConfig[code.status as keyof typeof statusConfig] || statusConfig.pending;
+                const StIcon = st.icon;
                 return (
                   <motion.div
                     key={code.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.03 }}
-                    className="glass-card rounded-xl p-4 flex items-center justify-between"
+                    className="glass-card rounded-xl p-4 space-y-3"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-primary">{code.code}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground uppercase">
-                          {code.tip_type}
-                        </span>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-primary">{code.code}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground uppercase">
+                            {code.tip_type}
+                          </span>
+                          <span className={cn("text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1", st.bg, st.color)}>
+                            <StIcon className="w-3 h-3" />{st.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {cat?.name || code.category_slug}
+                          {code.description && ` — ${code.description}`}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {cat?.name || code.category_slug}
-                        {code.description && ` — ${code.description}`}
-                      </p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive h-8 w-8"
+                        onClick={() => deleteCode.mutate(code.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive h-8 w-8"
-                      onClick={() => deleteCode.mutate(code.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {/* Status buttons */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground mr-1">Set status:</span>
+                      {(["pending", "won", "lost"] as const).map((s) => {
+                        const cfg = statusConfig[s];
+                        return (
+                          <Button
+                            key={s}
+                            size="sm"
+                            variant={code.status === s ? "default" : "outline"}
+                            className={cn("h-7 text-xs gap-1", code.status === s && s === "won" && "bg-green-600 hover:bg-green-700", code.status === s && s === "lost" && "bg-destructive hover:bg-destructive/90")}
+                            onClick={() => handleStatusChange(code.id, s)}
+                          >
+                            <cfg.icon className="w-3 h-3" />{cfg.label}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    {/* Comment */}
+                    <AdminCommentField
+                      initialComment={code.admin_comment || ""}
+                      onSave={(comment) => handleCommentSave(code.id, comment)}
+                    />
                   </motion.div>
                 );
               })}
@@ -208,6 +252,36 @@ const AdminBookingCodesPage = () => {
         </div>
       </AdminLayout>
     </AdminGuard>
+  );
+};
+
+const AdminCommentField = ({ initialComment, onSave }: { initialComment: string; onSave: (c: string) => void }) => {
+  const [comment, setComment] = useState(initialComment);
+  const [editing, setEditing] = useState(false);
+  const changed = comment !== initialComment;
+
+  if (!editing && !initialComment) {
+    return (
+      <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7 gap-1" onClick={() => setEditing(true)}>
+        <MessageSquare className="w-3 h-3" />Add comment
+      </Button>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      <Textarea
+        placeholder="Add a comment for users (e.g., '3/4 won, 1 lost')"
+        value={comment}
+        onChange={(e) => { setComment(e.target.value); setEditing(true); }}
+        className="text-xs min-h-[60px]"
+      />
+      {changed && (
+        <Button size="sm" className="h-7 text-xs" onClick={() => { onSave(comment); setEditing(false); }}>
+          Save Comment
+        </Button>
+      )}
+    </div>
   );
 };
 
