@@ -12,6 +12,8 @@ export interface BookingCode {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  status: string;
+  admin_comment: string | null;
 }
 
 export const useBookingCodes = (tipType?: string) => {
@@ -61,6 +63,22 @@ export const useCreateBookingCode = () => {
       queryClient.invalidateQueries({ queryKey: ["booking-codes"] });
       queryClient.invalidateQueries({ queryKey: ["booking-codes-all"] });
       toast.success("Booking code added");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+};
+
+export const useUpdateBookingCode = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; status?: string; admin_comment?: string }) => {
+      const { error } = await supabase.from("booking_codes").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["booking-codes"] });
+      queryClient.invalidateQueries({ queryKey: ["booking-codes-all"] });
+      toast.success("Booking code updated");
     },
     onError: (err: Error) => toast.error(err.message),
   });
