@@ -94,6 +94,7 @@ export type Database = {
       }
       booking_codes: {
         Row: {
+          admin_comment: string | null
           category_slug: string
           code: string
           created_at: string
@@ -101,10 +102,12 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          status: string | null
           tip_type: string
           updated_at: string
         }
         Insert: {
+          admin_comment?: string | null
           category_slug: string
           code: string
           created_at?: string
@@ -112,10 +115,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          status?: string | null
           tip_type?: string
           updated_at?: string
         }
         Update: {
+          admin_comment?: string | null
           category_slug?: string
           code?: string
           created_at?: string
@@ -123,6 +128,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          status?: string | null
           tip_type?: string
           updated_at?: string
         }

@@ -1,8 +1,15 @@
-import { Copy, Code2 } from "lucide-react";
+import { Copy, Code2, Check, X, Clock, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import type { BookingCode } from "@/hooks/useBookingCodes";
+
+const statusConfig = {
+  pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
+  won: { icon: Check, color: "text-green-600", bg: "bg-green-500/10", label: "Won ✅" },
+  lost: { icon: X, color: "text-destructive", bg: "bg-destructive/10", label: "Lost ❌" },
+};
 
 interface BookingCodeCardProps {
   code: BookingCode;
@@ -15,7 +22,6 @@ export const BookingCodeCard = ({ code, categoryName }: BookingCodeCardProps) =>
       await navigator.clipboard.writeText(code.code);
       toast.success("Booking code copied!");
     } catch {
-      // Fallback
       const textArea = document.createElement("textarea");
       textArea.value = code.code;
       document.body.appendChild(textArea);
@@ -26,11 +32,14 @@ export const BookingCodeCard = ({ code, categoryName }: BookingCodeCardProps) =>
     }
   };
 
+  const st = statusConfig[code.status as keyof typeof statusConfig] || statusConfig.pending;
+  const StIcon = st.icon;
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="glass-card rounded-xl p-3 border border-primary/20 bg-primary/5"
+      className="glass-card rounded-xl p-3 border border-primary/20 bg-primary/5 space-y-2"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -42,16 +51,27 @@ export const BookingCodeCard = ({ code, categoryName }: BookingCodeCardProps) =>
             )}
           </div>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 text-xs shrink-0 gap-1"
-          onClick={handleCopy}
-        >
-          <Copy className="w-3 h-3" />
-          Copy
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={cn("text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1 font-medium", st.bg, st.color)}>
+            <StIcon className="w-3 h-3" />{st.label}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs gap-1"
+            onClick={handleCopy}
+          >
+            <Copy className="w-3 h-3" />
+            Copy
+          </Button>
+        </div>
       </div>
+      {code.admin_comment && (
+        <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground bg-muted/30 rounded-lg px-2 py-1.5">
+          <MessageSquare className="w-3 h-3 mt-0.5 shrink-0" />
+          <span>{code.admin_comment}</span>
+        </div>
+      )}
     </motion.div>
   );
 };
