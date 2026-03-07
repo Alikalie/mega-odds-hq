@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
-  ArrowLeft,
   Plus,
   Trash2,
   Search,
@@ -49,6 +47,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTipCategories } from "@/hooks/useTipCategories";
+import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
 
@@ -62,12 +61,15 @@ interface TipWithCategory extends Tip {
 
 const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   const { data: categories } = useTipCategories();
+  const { fixtures, isLoading: isLoadingFixtures, fetchFixtures } = useFixtures();
   const [tips, setTips] = useState<TipWithCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [homeTeamOpen, setHomeTeamOpen] = useState(false);
+  const [awayTeamOpen, setAwayTeamOpen] = useState(false);
   const [newTip, setNewTip] = useState({
     homeTeam: "",
     awayTeam: "",
@@ -137,6 +139,10 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   });
 
   const handleAddTip = async () => {
+    if (!newTip.league) {
+      toast.error("Please select a league first");
+      return;
+    }
     if (!newTip.homeTeam || !newTip.awayTeam || !newTip.prediction || !newTip.odds) {
       toast.error("Please fill in all required fields");
       return;
@@ -270,72 +276,175 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                   <DialogTitle>Add New {config.title.slice(0, -1)}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Home Team</Label>
-                      <Input placeholder="Home team" value={newTip.homeTeam} onChange={(e) => setNewTip({ ...newTip, homeTeam: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Away Team</Label>
-                      <Input placeholder="Away team" value={newTip.awayTeam} onChange={(e) => setNewTip({ ...newTip, awayTeam: e.target.value })} />
-                    </div>
+                  {/* League Selection (Required First) */}
+                  <div className="space-y-2">
+                    <Label>League <span className="text-destructive">*</span></Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                          {newTip.league || "Select league first..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[320px] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search leagues..." />
+                          <CommandList>
+                            <CommandEmpty>No league found.</CommandEmpty>
+                            <CommandGroup className="max-h-[200px] overflow-y-auto">
+                              {LEAGUES.map((league) => (
+                                <CommandItem
+                                  key={league.name}
+                                  value={league.name}
+                                  onSelect={(val) => {
+                                    setNewTip({ ...newTip, league: val, homeTeam: "", awayTeam: "", matchTime: "" });
+                                    fetchFixtures(val);
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4", newTip.league === league.name ? "opacity-100" : "opacity-0")} />
+                                  <span className="mr-1.5">{getFlagEmoji(league.countryCode)}</span>
+                                  {league.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {isLoadingFixtures && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Fetching today's fixtures...
+                      </p>
+                    )}
+                    {newTip.league && !isLoadingFixtures && fixtures.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        ✅ {fixtures.length} match(es) found today
+                      </p>
+                    )}
+                    {newTip.league && !isLoadingFixtures && fixtures.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        ⚠️ No matches found today. Type teams manually below.
+                      </p>
+                    )}
                   </div>
+
+                  {/* Home & Away Teams */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Prediction</Label>
-                      <Input placeholder="e.g., Over 2.5" value={newTip.prediction} onChange={(e) => setNewTip({ ...newTip, prediction: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Odds</Label>
-                      <Input placeholder="e.g., 1.85" value={newTip.odds} onChange={(e) => setNewTip({ ...newTip, odds: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Match Time</Label>
-                      <Input
-                        type="time"
-                        value={newTip.matchTime}
-                        onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })}
-                      />
-                      {newTip.matchTime && (
-                        <p className="text-[10px] text-muted-foreground">
-                          🇸🇱 SL/GMT: {newTip.matchTime} | Local: {newTip.matchTime}
-                        </p>
+                      <Label>Home Team <span className="text-destructive">*</span></Label>
+                      {fixtures.length > 0 ? (
+                        <Popover open={homeTeamOpen} onOpenChange={setHomeTeamOpen}>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" className="w-full justify-between font-normal text-left" disabled={!newTip.league}>
+                              <span className="truncate">{newTip.homeTeam || "Select home team..."}</span>
+                              <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[220px] p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Search teams..." />
+                              <CommandList>
+                                <CommandEmpty>No team found.</CommandEmpty>
+                                <CommandGroup className="max-h-[200px] overflow-y-auto">
+                                  {fixtures.map((f) => (
+                                    <CommandItem
+                                      key={`home-${f.id}`}
+                                      value={f.homeTeam}
+                                      onSelect={(val) => {
+                                        const fixture = fixtures.find((fx) => fx.homeTeam.toLowerCase() === val.toLowerCase());
+                                        setNewTip({
+                                          ...newTip,
+                                          homeTeam: fixture?.homeTeam || val,
+                                          awayTeam: fixture?.awayTeam || newTip.awayTeam,
+                                          matchTime: fixture?.matchTime || newTip.matchTime,
+                                        });
+                                        setHomeTeamOpen(false);
+                                      }}
+                                    >
+                                      <Check className={cn("mr-2 h-4 w-4", newTip.homeTeam === f.homeTeam ? "opacity-100" : "opacity-0")} />
+                                      {f.homeTeam}
+                                      <span className="ml-auto text-[10px] text-muted-foreground">{f.matchTime}</span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <Input placeholder="Home team" value={newTip.homeTeam} onChange={(e) => setNewTip({ ...newTip, homeTeam: e.target.value })} disabled={!newTip.league} />
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label>League</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-                            {newTip.league || "Select league..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[280px] p-0" align="start">
-                          <Command>
-                            <CommandInput placeholder="Search leagues..." />
-                            <CommandList>
-                              <CommandEmpty>No league found.</CommandEmpty>
-                              <CommandGroup className="max-h-[200px] overflow-y-auto">
-                                {LEAGUES.map((league) => (
-                                  <CommandItem
-                                    key={league.name}
-                                    value={league.name}
-                                    onSelect={(val) => setNewTip({ ...newTip, league: val })}
-                                  >
-                                    <Check className={cn("mr-2 h-4 w-4", newTip.league === league.name ? "opacity-100" : "opacity-0")} />
-                                    <span className="mr-1.5">{getFlagEmoji(league.countryCode)}</span>
-                                    {league.name}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Label>Away Team <span className="text-destructive">*</span></Label>
+                      {fixtures.length > 0 ? (
+                        <Popover open={awayTeamOpen} onOpenChange={setAwayTeamOpen}>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" role="combobox" className="w-full justify-between font-normal text-left" disabled={!newTip.league}>
+                              <span className="truncate">{newTip.awayTeam || "Select away team..."}</span>
+                              <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[220px] p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Search teams..." />
+                              <CommandList>
+                                <CommandEmpty>No team found.</CommandEmpty>
+                                <CommandGroup className="max-h-[200px] overflow-y-auto">
+                                  {fixtures.map((f) => (
+                                    <CommandItem
+                                      key={`away-${f.id}`}
+                                      value={f.awayTeam}
+                                      onSelect={(val) => {
+                                        const fixture = fixtures.find((fx) => fx.awayTeam.toLowerCase() === val.toLowerCase());
+                                        setNewTip({
+                                          ...newTip,
+                                          awayTeam: fixture?.awayTeam || val,
+                                          homeTeam: fixture?.homeTeam || newTip.homeTeam,
+                                          matchTime: fixture?.matchTime || newTip.matchTime,
+                                        });
+                                        setAwayTeamOpen(false);
+                                      }}
+                                    >
+                                      <Check className={cn("mr-2 h-4 w-4", newTip.awayTeam === f.awayTeam ? "opacity-100" : "opacity-0")} />
+                                      {f.awayTeam}
+                                      <span className="ml-auto text-[10px] text-muted-foreground">{f.matchTime}</span>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <Input placeholder="Away team" value={newTip.awayTeam} onChange={(e) => setNewTip({ ...newTip, awayTeam: e.target.value })} disabled={!newTip.league} />
+                      )}
                     </div>
+                  </div>
+
+                  {/* Prediction, Odds, Match Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Prediction <span className="text-destructive">*</span></Label>
+                      <Input placeholder="e.g., Over 2.5" value={newTip.prediction} onChange={(e) => setNewTip({ ...newTip, prediction: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Odds <span className="text-destructive">*</span></Label>
+                      <Input placeholder="e.g., 1.85" value={newTip.odds} onChange={(e) => setNewTip({ ...newTip, odds: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Match Time {newTip.matchTime && <span className="text-xs text-muted-foreground ml-1">(auto-filled)</span>}</Label>
+                    <Input
+                      type="time"
+                      value={newTip.matchTime}
+                      onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })}
+                    />
+                    {newTip.matchTime && (
+                      <p className="text-[10px] text-muted-foreground">
+                        🇸🇱 SL/GMT: {newTip.matchTime} | Local: {newTip.matchTime}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-3">
                     <Label>Categories (select up to 4)</Label>
