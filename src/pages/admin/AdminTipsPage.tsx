@@ -61,12 +61,15 @@ interface TipWithCategory extends Tip {
 
 const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   const { data: categories } = useTipCategories();
+  const { fixtures, isLoading: isLoadingFixtures, fetchFixtures } = useFixtures();
   const [tips, setTips] = useState<TipWithCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [homeTeamOpen, setHomeTeamOpen] = useState(false);
+  const [awayTeamOpen, setAwayTeamOpen] = useState(false);
   const [newTip, setNewTip] = useState({
     homeTeam: "",
     awayTeam: "",
