@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
-  ArrowLeft,
   Plus,
   Trash2,
   Search,
@@ -49,6 +47,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTipCategories } from "@/hooks/useTipCategories";
+import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
 
