@@ -139,6 +139,10 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   });
 
   const handleAddTip = async () => {
+    if (!newTip.league) {
+      toast.error("Please select a league first");
+      return;
+    }
     if (!newTip.homeTeam || !newTip.awayTeam || !newTip.prediction || !newTip.odds) {
       toast.error("Please fill in all required fields");
       return;
