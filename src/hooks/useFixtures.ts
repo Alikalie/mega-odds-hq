@@ -14,7 +14,7 @@ export const useFixtures = () => {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchFixtures = async (league: string) => {
+  const fetchFixtures = async (league: string, date?: string) => {
     if (!league) {
       setFixtures([]);
       return;
@@ -22,19 +22,19 @@ export const useFixtures = () => {
 
     setIsLoading(true);
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const fetchDate = date || new Date().toISOString().split("T")[0];
       const { data, error } = await supabase.functions.invoke("fetch-fixtures", {
-        body: { league, date: today },
+        body: { league, date: fetchDate },
       });
 
       if (error) throw error;
 
       if (data?.fixtures && data.fixtures.length > 0) {
         setFixtures(data.fixtures);
-        toast.success(`Found ${data.fixtures.length} match(es) today`);
+        toast.success(`Found ${data.fixtures.length} match(es)`);
       } else {
         setFixtures([]);
-        toast.info(data?.message || "No matches found today for this league. Enter teams manually.");
+        toast.info(data?.message || "No matches found for this league on selected date. Enter teams manually.");
       }
     } catch (err) {
       console.error("Error fetching fixtures:", err);

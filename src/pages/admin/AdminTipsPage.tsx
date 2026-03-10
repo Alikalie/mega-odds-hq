@@ -8,7 +8,9 @@ import {
   Loader2,
   Check,
   ChevronsUpDown,
+  CalendarIcon,
 } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TipCard, Tip } from "@/components/cards/TipCard";
@@ -42,6 +44,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Calendar } from "@/components/ui/calendar";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +73,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [homeTeamOpen, setHomeTeamOpen] = useState(false);
   const [awayTeamOpen, setAwayTeamOpen] = useState(false);
+  const [fixtureDate, setFixtureDate] = useState<Date>(new Date());
   const [newTip, setNewTip] = useState({
     homeTeam: "",
     awayTeam: "",
@@ -137,6 +141,25 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
     const matchesCategory = activeCategory === "all" || tip.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleLeagueSelect = (selectedValue: string) => {
+    // cmdk lowercases onSelect value, so find original name from LEAGUES
+    const league = LEAGUES.find((l) => l.name.toLowerCase() === selectedValue.toLowerCase());
+    const leagueName = league?.name || selectedValue;
+    setNewTip({ ...newTip, league: leagueName, homeTeam: "", awayTeam: "", matchTime: "" });
+    const dateStr = format(fixtureDate, "yyyy-MM-dd");
+    fetchFixtures(leagueName, dateStr);
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    setFixtureDate(date);
+    if (newTip.league) {
+      const dateStr = format(date, "yyyy-MM-dd");
+      setNewTip({ ...newTip, homeTeam: "", awayTeam: "", matchTime: "" });
+      fetchFixtures(newTip.league, dateStr);
+    }
+  };
 
   const handleAddTip = async () => {
     if (!newTip.league) {
@@ -271,11 +294,39 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                   Add Tip
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add New {config.title.slice(0, -1)}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-4">
+                  {/* Date Picker */}
+                  <div className="space-y-2">
+                    <Label>Match Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !fixtureDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {fixtureDate ? format(fixtureDate, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={fixtureDate}
+                          onSelect={handleDateChange}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   {/* League Selection (Required First) */}
                   <div className="space-y-2">
                     <Label>League <span className="text-destructive">*</span></Label>
@@ -296,10 +347,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                                 <CommandItem
                                   key={league.name}
                                   value={league.name}
-                                  onSelect={(val) => {
-                                    setNewTip({ ...newTip, league: val, homeTeam: "", awayTeam: "", matchTime: "" });
-                                    fetchFixtures(val);
-                                  }}
+                                  onSelect={handleLeagueSelect}
                                 >
                                   <Check className={cn("mr-2 h-4 w-4", newTip.league === league.name ? "opacity-100" : "opacity-0")} />
                                   <span className="mr-1.5">{getFlagEmoji(league.countryCode)}</span>
@@ -313,17 +361,17 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                     </Popover>
                     {isLoadingFixtures && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Fetching today's fixtures...
+                        <Loader2 className="w-3 h-3 animate-spin" /> Fetching fixtures for {format(fixtureDate, "MMM d")}...
                       </p>
                     )}
                     {newTip.league && !isLoadingFixtures && fixtures.length > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        ✅ {fixtures.length} match(es) found today
+                        ✅ {fixtures.length} match(es) found for {format(fixtureDate, "MMM d")}
                       </p>
                     )}
                     {newTip.league && !isLoadingFixtures && fixtures.length === 0 && (
                       <p className="text-xs text-muted-foreground">
-                        ⚠️ No matches found today. Type teams manually below.
+                        ⚠️ No matches found for {format(fixtureDate, "MMM d")}. Type teams manually below.
                       </p>
                     )}
                   </div>
@@ -440,11 +488,6 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                       value={newTip.matchTime}
                       onChange={(e) => setNewTip({ ...newTip, matchTime: e.target.value })}
                     />
-                    {newTip.matchTime && (
-                      <p className="text-[10px] text-muted-foreground">
-                        🇸🇱 SL/GMT: {newTip.matchTime} | Local: {newTip.matchTime}
-                      </p>
-                    )}
                   </div>
                   <div className="space-y-3">
                     <Label>Categories (select up to 4)</Label>
