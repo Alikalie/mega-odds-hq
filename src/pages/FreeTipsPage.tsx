@@ -133,6 +133,7 @@ const FreeTipsPage = () => {
             <p className="text-sm text-muted-foreground">Check back later for new predictions</p>
           </motion.div>
         )}
+        <AdBanner slot="1234567891" format="rectangle" />
       </div>
     </AppLayout>
   );
