@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBookingCodes } from "@/hooks/useBookingCodes";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
