@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBookingCodes } from "@/hooks/useBookingCodes";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
@@ -86,6 +87,8 @@ const FreeTipsPage = () => {
           </div>
         )}
 
+        <AdBanner slot="1234567890" format="horizontal" />
+
         {tipsLoading ? (
           <div className="space-y-3">{[...Array(4)].map((_, i) => (<div key={i} className="h-40 rounded-xl bg-card/50 animate-pulse" />))}</div>
         ) : tips && tips.length > 0 ? (
@@ -130,6 +133,7 @@ const FreeTipsPage = () => {
             <p className="text-sm text-muted-foreground">Check back later for new predictions</p>
           </motion.div>
         )}
+        <AdBanner slot="1234567891" format="rectangle" />
       </div>
     </AppLayout>
   );
