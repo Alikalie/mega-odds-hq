@@ -87,6 +87,8 @@ const FreeTipsPage = () => {
           </div>
         )}
 
+        <AdBanner slot="1234567890" format="horizontal" />
+
         {tipsLoading ? (
           <div className="space-y-3">{[...Array(4)].map((_, i) => (<div key={i} className="h-40 rounded-xl bg-card/50 animate-pulse" />))}</div>
         ) : tips && tips.length > 0 ? (
