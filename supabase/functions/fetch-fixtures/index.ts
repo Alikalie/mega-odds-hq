@@ -1,9 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const jsonHeaders = {
+  ...corsHeaders,
+  "Content-Type": "application/json",
+};
+
+const API_HOST = "api-football-v1.p.rapidapi.com";
+const API_BASE_URL = `https://${API_HOST}/v3/fixtures`;
+const LOOKAHEAD_DAYS = 7;
 
 // Map league names to API-Football league IDs — keys MUST match leagues.ts exactly
 const LEAGUE_ID_MAP: Record<string, number> = {
@@ -171,128 +180,175 @@ const LEAGUE_ID_MAP: Record<string, number> = {
   "Olympics Football": 480,
 };
 
+interface Fixture {
+  id: number;
+  homeTeam: string;
+  awayTeam: string;
+  matchTime: string;
+  status: string;
+}
+
+type FixtureLookupResult =
+  | { ok: true; fixtures: Fixture[] }
+  | { ok: false; status: number; error: string };
+
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: jsonHeaders });
+
+const normaliseLeagueName = (league: string) =>
+  Object.keys(LEAGUE_ID_MAP).find((key) => key.toLowerCase() === league.toLowerCase());
+
+const toApiDate = (date: string) => {
+  const parsedDate = new Date(`${date}T12:00:00Z`);
+  return parsedDate.toISOString().split("T")[0];
+};
+
+const shiftDate = (date: string, days: number) => {
+  const parsedDate = new Date(`${date}T12:00:00Z`);
+  parsedDate.setUTCDate(parsedDate.getUTCDate() + days);
+  return parsedDate.toISOString().split("T")[0];
+};
+
+const getSeasonCandidates = (fetchDate: string) => {
+  const year = new Date(`${fetchDate}T12:00:00Z`).getUTCFullYear();
+  return [year, year - 1].filter((season, index, seasons) => seasons.indexOf(season) === index);
+};
+
+const parseFixtures = (payload: any): Fixture[] =>
+  (payload.response || [])
+    .sort((a: any, b: any) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime())
+    .map((fixture: any) => ({
+      id: fixture.fixture.id,
+      homeTeam: fixture.teams.home.name,
+      awayTeam: fixture.teams.away.name,
+      matchTime: new Date(fixture.fixture.date).toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }),
+      status: fixture.fixture.status.short,
+    }));
+
+const dedupeFixtures = (fixtures: Fixture[]) => Array.from(new Map(fixtures.map((fixture) => [fixture.id, fixture])).values());
+
+const fetchApiFixtures = async (rapidApiKey: string, query: string): Promise<FixtureLookupResult> => {
+  const response = await fetch(`${API_BASE_URL}?${query}`, {
+    headers: {
+      "X-RapidAPI-Key": rapidApiKey,
+      "X-RapidAPI-Host": API_HOST,
+    },
+  });
+
+  const bodyText = await response.text();
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      status: response.status,
+      error: bodyText,
+    };
+  }
+
+  const payload = bodyText ? JSON.parse(bodyText) : {};
+
+  return {
+    ok: true,
+    fixtures: dedupeFixtures(parseFixtures(payload)),
+  };
+};
+
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
     const { league, date } = await req.json();
-    
+
     if (!league) {
-      return new Response(JSON.stringify({ error: 'League is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return jsonResponse({ error: "League is required" }, 400);
     }
 
-    // Case-insensitive league lookup
-    const leagueKey = Object.keys(LEAGUE_ID_MAP).find(
-      (k) => k.toLowerCase() === league.toLowerCase()
-    );
+    const leagueKey = normaliseLeagueName(league);
     const leagueId = leagueKey ? LEAGUE_ID_MAP[leagueKey] : undefined;
-    
+
     if (!leagueId) {
-      return new Response(JSON.stringify({ fixtures: [], message: `No API mapping for "${league}". Enter teams manually.` }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ fixtures: [], message: `No API mapping for "${league}". Enter teams manually.` });
     }
 
-    const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
-    if (!RAPIDAPI_KEY) {
-      return new Response(JSON.stringify({ error: 'RAPIDAPI_KEY not configured' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const rapidApiKey = Deno.env.get("RAPIDAPI_KEY");
+    if (!rapidApiKey) {
+      return jsonResponse({ error: "RAPIDAPI_KEY not configured" }, 500);
     }
 
-    const fetchDate = date || new Date().toISOString().split('T')[0];
-    const season = new Date(fetchDate).getFullYear();
-
-    console.log(`Fetching fixtures: league=${leagueId}, season=${season}, date=${fetchDate}`);
-
-    const response = await fetch(
-      `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${leagueId}&season=${season}&date=${fetchDate}`,
+    const fetchDate = typeof date === "string" && date ? toApiDate(date) : new Date().toISOString().split("T")[0];
+    const upcomingToDate = shiftDate(fetchDate, LOOKAHEAD_DAYS);
+    const strategies = getSeasonCandidates(fetchDate).flatMap((season) => [
       {
-        headers: {
-          'X-RapidAPI-Key': RAPIDAPI_KEY,
-          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
-        },
+        label: `exact-date season=${season}`,
+        query: `league=${leagueId}&season=${season}&date=${fetchDate}`,
+        message: `Loaded fixtures for ${leagueKey} on ${fetchDate}.`,
+      },
+      {
+        label: `lookahead season=${season}`,
+        query: `league=${leagueId}&season=${season}&from=${fetchDate}&to=${upcomingToDate}`,
+        message: `No exact-date fixtures found, showing upcoming ${leagueKey} fixtures instead.`,
+      },
+    ]);
+
+    let lastApiError: string | null = null;
+
+    for (const strategy of strategies) {
+      console.log(`Trying fixture strategy: ${strategy.label}`);
+      const result = await fetchApiFixtures(rapidApiKey, strategy.query);
+
+      if (!result.ok) {
+        lastApiError = `${result.status} - ${result.error}`;
+        console.error(`Fixture provider error (${strategy.label}): ${lastApiError}`);
+        continue;
       }
-    );
 
-    const parseFixtures = (data: any) => (data.response || []).map((f: any) => ({
-      id: f.fixture.id,
-      homeTeam: f.teams.home.name,
-      awayTeam: f.teams.away.name,
-      matchTime: new Date(f.fixture.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      status: f.fixture.status.short,
-    }));
-
-    if (!response.ok) {
-      // Try previous season
-      const prevResponse = await fetch(
-        `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${leagueId}&season=${season - 1}&date=${fetchDate}`,
-        {
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
-          },
-        }
-      );
-      
-      if (!prevResponse.ok) {
-        const errText = await prevResponse.text();
-        console.error(`API error: ${prevResponse.status} - ${errText}`);
-        return new Response(JSON.stringify({ error: `API-Football error: ${prevResponse.status}`, details: errText }), {
-          status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      if (result.fixtures.length > 0) {
+        return jsonResponse({
+          fixtures: result.fixtures,
+          message: strategy.message,
         });
       }
-
-      const prevData = await prevResponse.json();
-      return new Response(JSON.stringify({ fixtures: parseFixtures(prevData) }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
     }
 
-    const data = await response.json();
-    let fixtures = parseFixtures(data);
-
-    // If no fixtures found with current season, try previous season
-    if (fixtures.length === 0) {
-      console.log(`No fixtures for season ${season}, trying ${season - 1}`);
-      const prevResponse = await fetch(
-        `https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${leagueId}&season=${season - 1}&date=${fetchDate}`,
-        {
-          headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
-          },
-        }
-      );
-      if (prevResponse.ok) {
-        const prevData = await prevResponse.json();
-        fixtures = parseFixtures(prevData);
-      }
+    if (lastApiError) {
+      return jsonResponse({ error: "Fixture provider unavailable", details: lastApiError }, 502);
     }
 
-    return new Response(JSON.stringify({ fixtures }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return jsonResponse({
+      fixtures: [],
+      message: `No fixtures found for ${leagueKey} starting from ${fetchDate}. Enter teams manually.`,
     });
   } catch (error) {
-    console.error('Error fetching fixtures:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("Error fetching fixtures:", error);
+    return jsonResponse(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      500,
+    );
   }
 });

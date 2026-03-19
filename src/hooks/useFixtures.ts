@@ -29,12 +29,12 @@ export const useFixtures = () => {
 
       if (error) throw error;
 
-      if (data?.fixtures && data.fixtures.length > 0) {
+      if (Array.isArray(data?.fixtures) && data.fixtures.length > 0) {
         setFixtures(data.fixtures);
-        toast.success(`Found ${data.fixtures.length} match(es)`);
+        toast.success(data?.message || `Loaded ${data.fixtures.length} fixture(s)`);
       } else {
         setFixtures([]);
-        toast.info(data?.message || "No matches found for this league on selected date. Enter teams manually.");
+        toast.info(data?.message || "No fixtures found for this league. Enter teams manually.");
       }
     } catch (err) {
       console.error("Error fetching fixtures:", err);

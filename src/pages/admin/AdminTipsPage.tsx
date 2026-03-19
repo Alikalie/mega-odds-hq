@@ -366,12 +366,12 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                     )}
                     {newTip.league && !isLoadingFixtures && fixtures.length > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        ✅ {fixtures.length} match(es) found for {format(fixtureDate, "MMM d")}
+                        ✅ Loaded {fixtures.length} fixture(s) for {newTip.league}
                       </p>
                     )}
                     {newTip.league && !isLoadingFixtures && fixtures.length === 0 && (
                       <p className="text-xs text-muted-foreground">
-                        ⚠️ No matches found for {format(fixtureDate, "MMM d")}. Type teams manually below.
+                        ⚠️ No fixtures loaded for {newTip.league}. Type teams manually below.
                       </p>
                     )}
                   </div>
@@ -397,15 +397,14 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                                   {fixtures.map((f) => (
                                     <CommandItem
                                       key={`home-${f.id}`}
-                                      value={f.homeTeam}
-                                      onSelect={(val) => {
-                                        const fixture = fixtures.find((fx) => fx.homeTeam.toLowerCase() === val.toLowerCase());
-                                        setNewTip({
-                                          ...newTip,
-                                          homeTeam: fixture?.homeTeam || val,
-                                          awayTeam: fixture?.awayTeam || newTip.awayTeam,
-                                          matchTime: fixture?.matchTime || newTip.matchTime,
-                                        });
+                                      value={`${f.homeTeam} ${f.awayTeam} ${f.matchTime}`}
+                                      onSelect={() => {
+                                        setNewTip((current) => ({
+                                          ...current,
+                                          homeTeam: f.homeTeam,
+                                          awayTeam: f.awayTeam,
+                                          matchTime: f.matchTime || current.matchTime,
+                                        }));
                                         setHomeTeamOpen(false);
                                       }}
                                     >
@@ -442,15 +441,14 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                                   {fixtures.map((f) => (
                                     <CommandItem
                                       key={`away-${f.id}`}
-                                      value={f.awayTeam}
-                                      onSelect={(val) => {
-                                        const fixture = fixtures.find((fx) => fx.awayTeam.toLowerCase() === val.toLowerCase());
-                                        setNewTip({
-                                          ...newTip,
-                                          awayTeam: fixture?.awayTeam || val,
-                                          homeTeam: fixture?.homeTeam || newTip.homeTeam,
-                                          matchTime: fixture?.matchTime || newTip.matchTime,
-                                        });
+                                      value={`${f.awayTeam} ${f.homeTeam} ${f.matchTime}`}
+                                      onSelect={() => {
+                                        setNewTip((current) => ({
+                                          ...current,
+                                          awayTeam: f.awayTeam,
+                                          homeTeam: f.homeTeam,
+                                          matchTime: f.matchTime || current.matchTime,
+                                        }));
                                         setAwayTeamOpen(false);
                                       }}
                                     >
