@@ -2,10 +2,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Trophy, Crown, Star, User, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useFeatureEnabled } from "@/hooks/useFeatureToggles";
 
-const navItems = [
+const baseNavItems = [
   { path: "/free-tips", icon: Trophy, label: "Free Tips" },
-  { path: "/predictions", icon: TrendingUp, label: "Predictions" },
   { path: "/vip", icon: Crown, label: "VIP" },
   { path: "/special", icon: Star, label: "Special" },
   { path: "/profile", icon: User, label: "Profile" },
@@ -13,6 +13,15 @@ const navItems = [
 
 export const BottomNav = () => {
   const location = useLocation();
+  const predictionsEnabled = useFeatureEnabled("predictions");
+
+  const navItems = predictionsEnabled
+    ? [
+        baseNavItems[0],
+        { path: "/predictions", icon: TrendingUp, label: "Predictions" },
+        ...baseNavItems.slice(1),
+      ]
+    : baseNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-area-pb">
