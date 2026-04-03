@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Trophy, Crown, Star, User } from "lucide-react";
+import { Trophy, Crown, Star, User, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const navItems = [
   { path: "/free-tips", icon: Trophy, label: "Free Tips" },
+  { path: "/predictions", icon: TrendingUp, label: "Predictions" },
   { path: "/vip", icon: Crown, label: "VIP" },
   { path: "/special", icon: Star, label: "Special" },
   { path: "/profile", icon: User, label: "Profile" },

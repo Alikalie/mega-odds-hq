@@ -48,6 +48,7 @@ const App = () => (
             {/* User Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/free-tips" element={<FreeTipsPage />} />
+            <Route path="/predictions" element={<PredictionsPage />} />
             <Route path="/vip" element={<VipPage />} />
             <Route path="/special" element={<SpecialPage />} />
             <Route path="/profile" element={<ProfilePage />} />
