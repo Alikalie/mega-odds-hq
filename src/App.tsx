@@ -31,6 +31,7 @@ import AdminPrivacySecurityPage from "./pages/admin/AdminPrivacySecurityPage";
 import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
 import AdminBookingCodesPage from "./pages/admin/AdminBookingCodesPage";
 import AdminFeatureTogglesPage from "./pages/admin/AdminFeatureTogglesPage";
+import PredictionsPage from "./pages/PredictionsPage";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { SuperAdminGuard } from "@/components/guards/SuperAdminGuard";
 
