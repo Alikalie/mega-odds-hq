@@ -1,8 +1,9 @@
-import { Copy, Code2, Check, X, Clock, MessageSquare } from "lucide-react";
+import { Copy, Code2, Check, X, Clock, MessageSquare, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { format, parseISO, differenceInDays } from "date-fns";
 import type { BookingCode } from "@/hooks/useBookingCodes";
 
 const statusConfig = {
@@ -36,20 +37,45 @@ export const BookingCodeCard = ({ code, categoryName }: BookingCodeCardProps) =>
   const st = statusConfig[code.status as keyof typeof statusConfig] || statusConfig.pending;
   const StIcon = st.icon;
 
+  const postedDate = parseISO(code.created_at);
+  const daysSincePosted = differenceInDays(new Date(), postedDate);
+  const isPastRecord = daysSincePosted > 30;
+  const dateLabel = format(postedDate, "MMM d, yyyy");
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="glass-card rounded-xl p-3 border border-primary/20 bg-primary/5 space-y-2"
+      className={cn(
+        "glass-card rounded-xl p-3 border space-y-2",
+        isPastRecord
+          ? "border-muted/30 bg-muted/10 opacity-75"
+          : "border-primary/20 bg-primary/5"
+      )}
     >
+      {/* Past record badge */}
+      {isPastRecord && (
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
+          <History className="w-3 h-3" />
+          <span>Past Record — {dateLabel}</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Code2 className="w-4 h-4 text-primary shrink-0" />
           <div className="min-w-0">
             <p className="font-mono font-bold text-primary text-sm truncate">{code.code}</p>
-            {code.description && (
-              <p className="text-[10px] text-muted-foreground truncate">{code.description}</p>
-            )}
+            <div className="flex items-center gap-1.5">
+              {!isPastRecord && (
+                <span className="text-[10px] text-muted-foreground">{dateLabel}</span>
+              )}
+              {code.description && (
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {!isPastRecord && "• "}{code.description}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
