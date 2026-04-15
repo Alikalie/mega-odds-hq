@@ -36,7 +36,8 @@ const AuthPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     confirmPassword: "",
     phoneNumber: "",
     countryCode: "+232",
@@ -76,8 +77,11 @@ const AuthPage = () => {
     }
 
     if (mode === "register") {
-      if (!formData.fullName.trim()) {
-        newErrors.fullName = "Full name is required";
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = "First name is required";
+      }
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = "Last name is required";
       }
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = "Passwords do not match";
@@ -118,10 +122,11 @@ const AuthPage = () => {
           navigate("/");
         }
       } else {
+        const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
         const { error } = await signUp(
           formData.email,
           formData.password,
-          formData.fullName,
+          fullName,
           formData.phoneNumber,
           formData.countryCode,
           formData.country,
@@ -199,24 +204,45 @@ const AuthPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <>
-                {/* Full Name */}
+                {/* First Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="firstName">First Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
-                      id="fullName"
+                      id="firstName"
                       type="text"
-                      placeholder="Enter your full name"
+                      placeholder="Enter your first name"
                       className="pl-10 h-12 bg-secondary/50 border-border/50"
-                      value={formData.fullName}
+                      value={formData.firstName}
                       onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
+                        setFormData({ ...formData, firstName: e.target.value })
                       }
                     />
                   </div>
-                  {errors.fullName && (
-                    <p className="text-xs text-destructive">{errors.fullName}</p>
+                  {errors.firstName && (
+                    <p className="text-xs text-destructive">{errors.firstName}</p>
+                  )}
+                </div>
+
+                {/* Last Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      className="pl-10 h-12 bg-secondary/50 border-border/50"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <p className="text-xs text-destructive">{errors.lastName}</p>
                   )}
                 </div>
 
