@@ -12,6 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import UserDashboardPage from "./pages/UserDashboardPage";
 import AuthPage from "./pages/AuthPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
+import VerifyOTPPage from "./pages/VerifyOTPPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminTipsPage from "./pages/admin/AdminTipsPage";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/dashboard" element={<UserDashboardPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/pending-approval" element={<PendingApprovalPage />} />
+            <Route path="/verify-email" element={<VerifyOTPPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

@@ -430,7 +430,7 @@ const AuthPage = () => {
         onOpenChange={(open) => {
           setShowPaymentDialog(open);
           if (!open) {
-            navigate("/pending-approval");
+            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
           }
         }}
         isSierraLeone={formData.country === "Sierra Leone"}
