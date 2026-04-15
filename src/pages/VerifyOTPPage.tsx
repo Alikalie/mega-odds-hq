@@ -29,7 +29,7 @@ const VerifyOTPPage = () => {
 
     setIsVerifying(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         email,
         token: otp,
         type: "signup",
@@ -39,11 +39,16 @@ const VerifyOTPPage = () => {
         toast.error(error.message || "Invalid verification code");
       } else {
         toast.success("Email verified successfully!");
-        if (packageType !== "free") {
-          navigate("/pending-approval");
-        } else {
-          navigate("/pending-approval");
+        
+        // Send welcome email in background
+        const fullName = data?.user?.user_metadata?.full_name || "";
+        if (fullName && email) {
+          supabase.functions.invoke("send-welcome-email", {
+            body: { email, fullName },
+          }).catch(console.error);
         }
+        
+        navigate("/pending-approval");
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
