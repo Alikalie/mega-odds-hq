@@ -35,6 +35,10 @@ interface PaymentDialogProps {
   packageId?: string;
   requestedTier?: string;
   onUpgradeRequestSent?: () => void;
+  registrationEmail?: string;
+  registrationName?: string;
+  registrationPhone?: string;
+  registrationCountry?: string;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
