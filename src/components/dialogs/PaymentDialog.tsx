@@ -235,7 +235,7 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
             })}
 
             {/* Payment Proof Upload */}
-            {user && requestedTier && (
+            {requestedTier && (
               <div className="border-t border-border pt-4 space-y-3">
                 <p className="text-sm font-medium">Upload Payment Proof</p>
                 <input
@@ -337,7 +337,7 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
           </div>
 
           {/* Submit request for non-SL users too */}
-          {user && requestedTier && (
+          {requestedTier && (
             <div className="border-t border-border pt-4">
               <Button className="w-full" onClick={handleSubmitWithProof} disabled={isSubmitting}>
                 {isSubmitting ? (
