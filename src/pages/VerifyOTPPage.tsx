@@ -47,6 +47,23 @@ const VerifyOTPPage = () => {
             body: { email, fullName },
           }).catch(console.error);
         }
+
+        // Auto-create upgrade request for non-free package selections
+        if (packageType !== "free" && data?.user?.id) {
+          const metadata = data.user.user_metadata || {};
+          supabase.from("upgrade_requests").insert({
+            user_id: data.user.id,
+            user_email: email,
+            user_name: metadata.full_name || null,
+            user_phone: metadata.phone_number || null,
+            user_country: metadata.country || null,
+            current_tier: "free",
+            requested_tier: packageType,
+            requested_package_name: packageType === "vip" ? "VIP Package" : "Special Package",
+          }).then(({ error: reqError }) => {
+            if (reqError) console.error("Failed to create upgrade request:", reqError);
+          });
+        }
         
         navigate("/pending-approval");
       }
