@@ -122,15 +122,26 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
   };
 
   const handleSubmitWithProof = async () => {
-    if (!user || !requestedTier) return;
+    if (!requestedTier) return;
+    
+    // For registration flow, user may not be authenticated yet
+    const userId = user?.id;
+    const userEmail = registrationEmail || profile?.email || user?.email || "";
+    const userName = registrationName || profile?.full_name || null;
+    const userPhone = registrationPhone || profile?.phone_number || null;
+    const userCountry = registrationCountry || profile?.country || null;
+    const currentTier = profile?.subscription || "free";
+
+    if (!userEmail) return;
+
     setIsSubmitting(true);
 
     try {
       let proofUrl: string | null = null;
 
-      if (proofFile) {
+      if (proofFile && userId) {
         const fileExt = proofFile.name.split(".").pop();
-        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+        const filePath = `${userId}/${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from("payment-proofs")
           .upload(filePath, proofFile);
@@ -139,18 +150,24 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
         proofUrl = filePath;
       }
 
-      const { error } = await supabase.from("upgrade_requests").insert({
-        user_id: user.id,
-        user_email: profile?.email || user.email || "",
-        user_name: profile?.full_name || null,
-        user_phone: profile?.phone_number || null,
-        user_country: profile?.country || null,
-        current_tier: profile?.subscription || "free",
+      const insertData: any = {
+        user_email: userEmail,
+        user_name: userName,
+        user_phone: userPhone,
+        user_country: userCountry,
+        current_tier: currentTier,
         requested_tier: requestedTier,
         requested_package_id: packageId || null,
         requested_package_name: packageName || null,
         payment_proof_url: proofUrl,
-      });
+      };
+
+      // Only include user_id if we have an authenticated user
+      if (userId) {
+        insertData.user_id = userId;
+      }
+
+      const { error } = await supabase.from("upgrade_requests").insert(insertData);
 
       if (error) throw error;
 
