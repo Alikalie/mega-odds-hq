@@ -35,6 +35,10 @@ interface PaymentDialogProps {
   packageId?: string;
   requestedTier?: string;
   onUpgradeRequestSent?: () => void;
+  registrationEmail?: string;
+  registrationName?: string;
+  registrationPhone?: string;
+  registrationCountry?: string;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -50,7 +54,7 @@ const supportIconMap: Record<string, React.ComponentType<{ className?: string }>
   telegram: Send,
 };
 
-export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, requestedTier, onUpgradeRequestSent }: PaymentDialogProps) => {
+export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, requestedTier, onUpgradeRequestSent, registrationEmail, registrationName, registrationPhone, registrationCountry }: PaymentDialogProps) => {
   const { user, profile } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [supportContacts, setSupportContacts] = useState<SupportContact[]>([]);
@@ -118,15 +122,25 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
   };
 
   const handleSubmitWithProof = async () => {
-    if (!user || !requestedTier) return;
+    if (!requestedTier) return;
+    
+    const userId = user?.id;
+    const userEmail = registrationEmail || profile?.email || user?.email || "";
+    const userName = registrationName || profile?.full_name || null;
+    const userPhone = registrationPhone || profile?.phone_number || null;
+    const userCountry = registrationCountry || profile?.country || null;
+    const currentTier = profile?.subscription || "free";
+
+    if (!userEmail) return;
+
     setIsSubmitting(true);
 
     try {
       let proofUrl: string | null = null;
 
-      if (proofFile) {
+      if (proofFile && userId) {
         const fileExt = proofFile.name.split(".").pop();
-        const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+        const filePath = `${userId}/${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from("payment-proofs")
           .upload(filePath, proofFile);
@@ -135,20 +149,25 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
         proofUrl = filePath;
       }
 
-      const { error } = await supabase.from("upgrade_requests").insert({
-        user_id: user.id,
-        user_email: profile?.email || user.email || "",
-        user_name: profile?.full_name || null,
-        user_phone: profile?.phone_number || null,
-        user_country: profile?.country || null,
-        current_tier: profile?.subscription || "free",
-        requested_tier: requestedTier,
-        requested_package_id: packageId || null,
-        requested_package_name: packageName || null,
-        payment_proof_url: proofUrl,
-      });
+      // If user is authenticated, create upgrade request now
+      if (userId) {
+        const { error } = await supabase.from("upgrade_requests").insert({
+          user_id: userId,
+          user_email: userEmail,
+          user_name: userName,
+          user_phone: userPhone,
+          user_country: userCountry,
+          current_tier: currentTier,
+          requested_tier: requestedTier,
+          requested_package_id: packageId || null,
+          requested_package_name: packageName || null,
+          payment_proof_url: proofUrl,
+        });
+        if (error) throw error;
+      }
 
-      if (error) throw error;
+      // For unauthenticated registration flow, the upgrade request
+      // will be created after email verification in VerifyOTPPage
 
       toast.success("Upgrade request submitted! Admin will review shortly.");
       onUpgradeRequestSent?.();
@@ -214,7 +233,7 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
             })}
 
             {/* Payment Proof Upload */}
-            {user && requestedTier && (
+            {requestedTier && (
               <div className="border-t border-border pt-4 space-y-3">
                 <p className="text-sm font-medium">Upload Payment Proof</p>
                 <input
@@ -316,7 +335,7 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
           </div>
 
           {/* Submit request for non-SL users too */}
-          {user && requestedTier && (
+          {requestedTier && (
             <div className="border-t border-border pt-4">
               <Button className="w-full" onClick={handleSubmitWithProof} disabled={isSubmitting}>
                 {isSubmitting ? (
