@@ -461,6 +461,14 @@ const AuthPage = () => {
         }}
         isSierraLeone={formData.country === "Sierra Leone"}
         packageName={packageTypes.find(p => p.id === formData.packageType)?.name}
+        requestedTier={formData.packageType}
+        onUpgradeRequestSent={() => {
+          navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
+        }}
+        registrationEmail={formData.email}
+        registrationName={`${formData.firstName.trim()} ${formData.lastName.trim()}`}
+        registrationPhone={`${formData.countryCode}${formData.phoneNumber}`}
+        registrationCountry={formData.country}
       />
     </div>
   );
