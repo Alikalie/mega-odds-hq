@@ -134,12 +134,12 @@ const AuthPage = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created! Please check your email to verify your account.");
+          toast.success("Account created! Please check your email for your verification code.");
           // Show payment dialog for non-free packages
           if (formData.packageType !== "free") {
             setShowPaymentDialog(true);
           } else {
-            navigate("/pending-approval");
+            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
           }
         }
       }
@@ -430,7 +430,7 @@ const AuthPage = () => {
         onOpenChange={(open) => {
           setShowPaymentDialog(open);
           if (!open) {
-            navigate("/pending-approval");
+            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
           }
         }}
         isSierraLeone={formData.country === "Sierra Leone"}
