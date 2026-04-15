@@ -124,7 +124,6 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
   const handleSubmitWithProof = async () => {
     if (!requestedTier) return;
     
-    // For registration flow, user may not be authenticated yet
     const userId = user?.id;
     const userEmail = registrationEmail || profile?.email || user?.email || "";
     const userName = registrationName || profile?.full_name || null;
@@ -150,26 +149,25 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
         proofUrl = filePath;
       }
 
-      const insertData: any = {
-        user_email: userEmail,
-        user_name: userName,
-        user_phone: userPhone,
-        user_country: userCountry,
-        current_tier: currentTier,
-        requested_tier: requestedTier,
-        requested_package_id: packageId || null,
-        requested_package_name: packageName || null,
-        payment_proof_url: proofUrl,
-      };
-
-      // Only include user_id if we have an authenticated user
+      // If user is authenticated, create upgrade request now
       if (userId) {
-        insertData.user_id = userId;
+        const { error } = await supabase.from("upgrade_requests").insert({
+          user_id: userId,
+          user_email: userEmail,
+          user_name: userName,
+          user_phone: userPhone,
+          user_country: userCountry,
+          current_tier: currentTier,
+          requested_tier: requestedTier,
+          requested_package_id: packageId || null,
+          requested_package_name: packageName || null,
+          payment_proof_url: proofUrl,
+        });
+        if (error) throw error;
       }
 
-      const { error } = await supabase.from("upgrade_requests").insert(insertData);
-
-      if (error) throw error;
+      // For unauthenticated registration flow, the upgrade request
+      // will be created after email verification in VerifyOTPPage
 
       toast.success("Upgrade request submitted! Admin will review shortly.");
       onUpgradeRequestSent?.();
