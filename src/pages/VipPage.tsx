@@ -14,7 +14,7 @@ import { useTipCategories } from "@/hooks/useTipCategories";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
-import { AdBanner } from "@/components/ads/AdBanner";
+
 
 const statusConfig = {
   pending: { icon: Clock, color: "text-muted-foreground", bg: "bg-muted/50", label: "Pending" },
@@ -143,7 +143,7 @@ const VipPage = () => {
             )}
           </div>
 
-          <AdBanner slot="2345678901" format="rectangle" />
+          
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-center space-y-3">
             <p className="text-sm text-muted-foreground">Already have an account?</p>

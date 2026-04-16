@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Crown, Star, Package, Loader2, Calendar } from "lucide-react";
+import { Trophy, Crown, Star, Package, Loader2, Calendar, Upload } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TipsTable } from "@/components/dashboard/TipsTable";
 import { SubscriptionCard } from "@/components/dashboard/SubscriptionCard";
+import { PaymentProofUpload } from "@/components/dashboard/PaymentProofUpload";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,6 +56,7 @@ const UserDashboardPage = () => {
   const [activeFreeCategory, setActiveFreeCategory] = useState("all");
   const [activeVipCategory, setActiveVipCategory] = useState("all");
   const [activeSpecialCategory, setActiveSpecialCategory] = useState("all");
+  const [hasPendingUpgrade, setHasPendingUpgrade] = useState(false);
 
   const { data: freeBookingCodes } = useBookingCodes("free");
   const { data: vipBookingCodes } = useBookingCodes("vip");
@@ -73,6 +75,18 @@ const UserDashboardPage = () => {
   useEffect(() => {
     if (user) {
       fetchTips();
+      // Check for pending upgrade requests without payment proof
+      supabase
+        .from("upgrade_requests")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .is("payment_proof_url", null)
+        .limit(1)
+        .then(({ data }) => {
+          setHasPendingUpgrade(!!data && data.length > 0);
+        });
+
       const channels = [
         supabase.channel("dash-free").on("postgres_changes", { event: "*", schema: "public", table: "free_tips" }, () => fetchTips()).subscribe(),
         supabase.channel("dash-vip").on("postgres_changes", { event: "*", schema: "public", table: "vip_tips" }, () => fetchTips()).subscribe(),
@@ -153,6 +167,13 @@ const UserDashboardPage = () => {
             </div>
           )}
         </motion.section>
+
+        {/* Payment Proof Upload */}
+        {hasPendingUpgrade && (
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+            <PaymentProofUpload onUploaded={() => setHasPendingUpgrade(false)} />
+          </motion.section>
+        )}
 
         {/* Tips */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-4">

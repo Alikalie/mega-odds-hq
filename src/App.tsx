@@ -33,6 +33,7 @@ import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
 import AdminBookingCodesPage from "./pages/admin/AdminBookingCodesPage";
 import AdminFeatureTogglesPage from "./pages/admin/AdminFeatureTogglesPage";
 import PredictionsPage from "./pages/PredictionsPage";
+import AdminPredictionTypesPage from "./pages/admin/AdminPredictionTypesPage";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { SuperAdminGuard } from "@/components/guards/SuperAdminGuard";
 
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/admin/upgrade-requests" element={<SuperAdminGuard><AdminUpgradeRequestsPage /></SuperAdminGuard>} />
             <Route path="/admin/booking-codes" element={<AdminBookingCodesPage />} />
             <Route path="/admin/feature-toggles" element={<SuperAdminGuard><AdminFeatureTogglesPage /></SuperAdminGuard>} />
+            <Route path="/admin/prediction-types" element={<SuperAdminGuard><AdminPredictionTypesPage /></SuperAdminGuard>} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

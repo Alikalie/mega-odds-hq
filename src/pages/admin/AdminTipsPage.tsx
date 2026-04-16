@@ -53,6 +53,52 @@ import { useTipCategories } from "@/hooks/useTipCategories";
 import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
+import { usePredictionTypes } from "@/hooks/usePredictionTypes";
+
+const PredictionInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const { data: predictionTypes } = usePredictionTypes();
+  const [open, setOpen] = useState(false);
+
+  if (!predictionTypes || predictionTypes.length === 0) {
+    return <Input placeholder="e.g., Over 2.5" value={value} onChange={(e) => onChange(e.target.value)} />;
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+          {value || "Select prediction..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[220px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search or type..." onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const input = (e.target as HTMLInputElement).value.trim();
+              if (input) { onChange(input); setOpen(false); }
+            }
+          }} />
+          <CommandList>
+            <CommandEmpty><p className="text-sm py-2 text-muted-foreground">Press Enter to use typed value</p></CommandEmpty>
+            <CommandGroup className="max-h-[200px] overflow-y-auto">
+              {predictionTypes.map((pt) => (
+                <CommandItem key={pt.id} value={pt.name} onSelect={(v) => {
+                  const found = predictionTypes.find((p) => p.name.toLowerCase() === v.toLowerCase());
+                  onChange(found?.name || v);
+                  setOpen(false);
+                }}>
+                  <Check className={cn("mr-2 h-4 w-4", value === pt.name ? "opacity-100" : "opacity-0")} />
+                  {pt.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
@@ -166,8 +212,8 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
       toast.error("Please select a league first");
       return;
     }
-    if (!newTip.homeTeam || !newTip.awayTeam || !newTip.prediction || !newTip.odds) {
-      toast.error("Please fill in all required fields");
+    if (!newTip.homeTeam || !newTip.awayTeam || !newTip.prediction) {
+      toast.error("Please fill in home team, away team, and prediction");
       return;
     }
     if (newTip.categories.length === 0) {
@@ -329,19 +375,31 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
 
                   {/* League Selection (Required First) */}
                   <div className="space-y-2">
-                    <Label>League <span className="text-destructive">*</span></Label>
+                     <Label>League <span className="text-destructive">*</span></Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-                          {newTip.league || "Select league first..."}
+                          {newTip.league || "Select or type league..."}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[320px] p-0" align="start">
                         <Command>
-                          <CommandInput placeholder="Search leagues..." />
+                          <CommandInput
+                            placeholder="Search or type league name..."
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const input = (e.target as HTMLInputElement).value.trim();
+                                if (input && !LEAGUES.find((l) => l.name.toLowerCase() === input.toLowerCase())) {
+                                  setNewTip({ ...newTip, league: input, homeTeam: "", awayTeam: "", matchTime: "" });
+                                }
+                              }
+                            }}
+                          />
                           <CommandList>
-                            <CommandEmpty>No league found.</CommandEmpty>
+                            <CommandEmpty>
+                              <p className="text-sm text-muted-foreground py-2">No league found. Press Enter to use typed name.</p>
+                            </CommandEmpty>
                             <CommandGroup className="max-h-[200px] overflow-y-auto">
                               {LEAGUES.map((league) => (
                                 <CommandItem
@@ -469,14 +527,14 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                   </div>
 
                   {/* Prediction, Odds, Match Time */}
-                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Prediction <span className="text-destructive">*</span></Label>
-                      <Input placeholder="e.g., Over 2.5" value={newTip.prediction} onChange={(e) => setNewTip({ ...newTip, prediction: e.target.value })} />
+                      <PredictionInput value={newTip.prediction} onChange={(v) => setNewTip({ ...newTip, prediction: v })} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Odds <span className="text-destructive">*</span></Label>
-                      <Input placeholder="e.g., 1.85" value={newTip.odds} onChange={(e) => setNewTip({ ...newTip, odds: e.target.value })} />
+                      <Label>Odds</Label>
+                      <Input placeholder="e.g., 1.85 (optional)" value={newTip.odds} onChange={(e) => setNewTip({ ...newTip, odds: e.target.value })} />
                     </div>
                   </div>
                   <div className="space-y-2">
