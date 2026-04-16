@@ -75,6 +75,18 @@ const UserDashboardPage = () => {
   useEffect(() => {
     if (user) {
       fetchTips();
+      // Check for pending upgrade requests without payment proof
+      supabase
+        .from("upgrade_requests")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .is("payment_proof_url", null)
+        .limit(1)
+        .then(({ data }) => {
+          setHasPendingUpgrade(!!data && data.length > 0);
+        });
+
       const channels = [
         supabase.channel("dash-free").on("postgres_changes", { event: "*", schema: "public", table: "free_tips" }, () => fetchTips()).subscribe(),
         supabase.channel("dash-vip").on("postgres_changes", { event: "*", schema: "public", table: "vip_tips" }, () => fetchTips()).subscribe(),
