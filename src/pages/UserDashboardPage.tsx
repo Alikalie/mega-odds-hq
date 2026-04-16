@@ -168,6 +168,13 @@ const UserDashboardPage = () => {
           )}
         </motion.section>
 
+        {/* Payment Proof Upload */}
+        {hasPendingUpgrade && (
+          <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+            <PaymentProofUpload onUploaded={() => setHasPendingUpgrade(false)} />
+          </motion.section>
+        )}
+
         {/* Tips */}
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="space-y-4">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
