@@ -56,6 +56,7 @@ const UserDashboardPage = () => {
   const [activeFreeCategory, setActiveFreeCategory] = useState("all");
   const [activeVipCategory, setActiveVipCategory] = useState("all");
   const [activeSpecialCategory, setActiveSpecialCategory] = useState("all");
+  const [hasPendingUpgrade, setHasPendingUpgrade] = useState(false);
 
   const { data: freeBookingCodes } = useBookingCodes("free");
   const { data: vipBookingCodes } = useBookingCodes("vip");
