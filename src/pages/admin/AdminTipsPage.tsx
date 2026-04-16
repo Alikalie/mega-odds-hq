@@ -55,6 +55,51 @@ import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
 import { usePredictionTypes } from "@/hooks/usePredictionTypes";
 
+const PredictionInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const { data: predictionTypes } = usePredictionTypes();
+  const [open, setOpen] = useState(false);
+
+  if (!predictionTypes || predictionTypes.length === 0) {
+    return <Input placeholder="e.g., Over 2.5" value={value} onChange={(e) => onChange(e.target.value)} />;
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+          {value || "Select prediction..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[220px] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search or type..." onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const input = (e.target as HTMLInputElement).value.trim();
+              if (input) { onChange(input); setOpen(false); }
+            }
+          }} />
+          <CommandList>
+            <CommandEmpty><p className="text-sm py-2 text-muted-foreground">Press Enter to use typed value</p></CommandEmpty>
+            <CommandGroup className="max-h-[200px] overflow-y-auto">
+              {predictionTypes.map((pt) => (
+                <CommandItem key={pt.id} value={pt.name} onSelect={(v) => {
+                  const found = predictionTypes.find((p) => p.name.toLowerCase() === v.toLowerCase());
+                  onChange(found?.name || v);
+                  setOpen(false);
+                }}>
+                  <Check className={cn("mr-2 h-4 w-4", value === pt.name ? "opacity-100" : "opacity-0")} />
+                  {pt.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
 }
