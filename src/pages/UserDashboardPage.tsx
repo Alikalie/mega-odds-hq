@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Crown, Star, Package, Loader2, Calendar } from "lucide-react";
+import { Trophy, Crown, Star, Package, Loader2, Calendar, Upload } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { TipsTable } from "@/components/dashboard/TipsTable";
 import { SubscriptionCard } from "@/components/dashboard/SubscriptionCard";
+import { PaymentProofUpload } from "@/components/dashboard/PaymentProofUpload";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
