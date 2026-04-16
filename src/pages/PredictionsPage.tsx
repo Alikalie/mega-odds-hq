@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Calendar, TrendingUp, Shield, Loader2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AdBanner } from "@/components/ads/AdBanner";
+import { cn } from "@/lib/utils";
 
 const ratingColors: Record<string, string> = {
   strong_value: "text-green-500 bg-green-500/10",
@@ -204,7 +204,7 @@ const PredictionsPage = () => {
           </Button>
         </div>
 
-        <AdBanner slot="5678901234" format="horizontal" />
+        
 
         {isLoading ? (
           <div className="flex flex-col items-center py-12 gap-3">
@@ -239,7 +239,7 @@ const PredictionsPage = () => {
           </div>
         )}
 
-        <AdBanner slot="5678901235" format="rectangle" />
+        
       </div>
     </AppLayout>
   );
