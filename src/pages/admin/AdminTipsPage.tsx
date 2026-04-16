@@ -53,6 +53,7 @@ import { useTipCategories } from "@/hooks/useTipCategories";
 import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
 import { cn } from "@/lib/utils";
+import { usePredictionTypes } from "@/hooks/usePredictionTypes";
 
 interface AdminTipsPageProps {
   tipType: "free" | "vip" | "special";
