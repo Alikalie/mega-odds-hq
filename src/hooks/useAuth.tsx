@@ -149,7 +149,7 @@
     country?: string,
     packageType?: string
   ) => {
-    const redirectUrl = `https://mega-odds-hq.vercel.app/`;
+    const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
