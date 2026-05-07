@@ -231,6 +231,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
         match_time: newTip.matchTime || "TBD",
         league: newTip.league || "Unknown",
         category: cat,
+        tip_date: format(fixtureDate, "yyyy-MM-dd"),
       }));
 
       const { data, error } = await supabase

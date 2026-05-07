@@ -36,7 +36,8 @@ const getDateLabel = (dateStr: string) => {
 const groupTipsByDate = (tips: any[]) => {
   const groups: Record<string, any[]> = {};
   tips.forEach((tip) => {
-    const label = getDateLabel(tip.created_at);
+    const dateStr = tip.tip_date || tip.created_at;
+    const label = getDateLabel(dateStr);
     if (!groups[label]) groups[label] = [];
     groups[label].push(tip);
   });

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Check, X, Minus, Trophy, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -30,46 +32,69 @@ const TYPE_TO_LABEL: Record<string, string> = {
 
 const TipsHistoryPage = () => {
   const { type = "free" } = useParams<{ type: string }>();
-  const { isApproved, isVip, isSpecial } = useAuth();
+  const { isApproved, isVip, isSpecial, isAdmin } = useAuth();
   const [tips, setTips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const table = TYPE_TO_TABLE[type] || "free_tips";
   const label = TYPE_TO_LABEL[type] || "Tips";
 
-  // Block VIP/Special history if not entitled
   const blocked =
     (type === "vip" && (!isApproved || !isVip)) ||
     (type === "special" && (!isApproved || !isSpecial));
+
+  const load = async () => {
+    setLoading(true);
+    let query = supabase
+      .from(table)
+      .select("*")
+      .order("tip_date", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    // Non-admins never see hidden tips
+    if (!isAdmin) {
+      query = query.eq("hidden_from_history", false);
+    }
+
+    const { data } = await query;
+    setTips(data || []);
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (blocked) {
       setLoading(false);
       return;
     }
-    const load = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from(table)
-        .select("*")
-        .order("created_at", { ascending: false });
-      setTips(data || []);
-      setLoading(false);
-    };
     load();
-  }, [table, blocked]);
+  }, [table, blocked, isAdmin]);
+
+  const filtered = useMemo(() => {
+    if (!selectedDate) return tips;
+    const key = format(selectedDate, "yyyy-MM-dd");
+    return tips.filter((t) => (t.tip_date || t.created_at?.slice(0, 10)) === key);
+  }, [tips, selectedDate]);
 
   const grouped = useMemo(() => {
     const g: Record<string, any[]> = {};
-    tips.forEach((t) => {
-      const key = format(parseISO(t.created_at), "yyyy-MM-dd");
+    filtered.forEach((t) => {
+      const key = t.tip_date || t.created_at.slice(0, 10);
       if (!g[key]) g[key] = [];
       g[key].push(t);
     });
     return g;
-  }, [tips]);
+  }, [filtered]);
 
   const dateKeys = Object.keys(grouped).sort((a, b) => (a < b ? 1 : -1));
+
+  const toggleHidden = async (tip: any) => {
+    const { error } = await supabase
+      .from(table)
+      .update({ hidden_from_history: !tip.hidden_from_history })
+      .eq("id", tip.id);
+    if (!error) load();
+  };
 
   return (
     <AppLayout>
@@ -84,6 +109,31 @@ const TipsHistoryPage = () => {
           <p className="text-sm text-muted-foreground">All previous predictions by date</p>
         </motion.div>
 
+        {!blocked && (
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "PPP") : "Jump to a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {selectedDate && (
+              <Button variant="ghost" size="sm" onClick={() => setSelectedDate(undefined)}>Clear</Button>
+            )}
+          </div>
+        )}
+
         {blocked ? (
           <div className="text-center py-12 text-muted-foreground text-sm">
             You need an active {type.toUpperCase()} subscription to view this history.
@@ -95,8 +145,10 @@ const TipsHistoryPage = () => {
             <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
               <Trophy className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="font-semibold text-lg mb-1">No History Yet</h3>
-            <p className="text-sm text-muted-foreground">Past predictions will appear here</p>
+            <h3 className="font-semibold text-lg mb-1">No History Found</h3>
+            <p className="text-sm text-muted-foreground">
+              {selectedDate ? "No tips posted on this date" : "Past predictions will appear here"}
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -120,7 +172,7 @@ const TipsHistoryPage = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        className="glass-card rounded-xl p-4 space-y-3"
+                        className={cn("glass-card rounded-xl p-4 space-y-3", tip.hidden_from_history && "opacity-60 border border-dashed border-warning/40")}
                       >
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground font-medium">{tip.league}</span>
@@ -141,6 +193,16 @@ const TipsHistoryPage = () => {
                         <div className={cn("flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium", status.bg, status.color)}>
                           <StatusIcon className="w-3.5 h-3.5" /><span>{status.label}</span>
                         </div>
+                        {isAdmin && (
+                          <Button
+                            size="sm"
+                            variant={tip.hidden_from_history ? "default" : "outline"}
+                            className="w-full"
+                            onClick={() => toggleHidden(tip)}
+                          >
+                            {tip.hidden_from_history ? "Restore to user history" : "Hide from user history"}
+                          </Button>
+                        )}
                       </motion.div>
                     );
                   })}
