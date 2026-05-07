@@ -139,12 +139,11 @@ const AuthPage = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created! Please check your email for your verification code.");
-          // Show payment dialog for non-free packages
+          toast.success("Account created! Awaiting admin approval.");
           if (formData.packageType !== "free") {
             setShowPaymentDialog(true);
           } else {
-            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
+            navigate("/pending-approval");
           }
         }
       }
@@ -456,14 +455,14 @@ const AuthPage = () => {
         onOpenChange={(open) => {
           setShowPaymentDialog(open);
           if (!open) {
-            navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
+            navigate("/pending-approval");
           }
         }}
         isSierraLeone={formData.country === "Sierra Leone"}
         packageName={packageTypes.find(p => p.id === formData.packageType)?.name}
         requestedTier={formData.packageType}
         onUpgradeRequestSent={() => {
-          navigate(`/verify-email?email=${encodeURIComponent(formData.email)}&package=${formData.packageType}`);
+          navigate("/pending-approval");
         }}
         registrationEmail={formData.email}
         registrationName={`${formData.firstName.trim()} ${formData.lastName.trim()}`}
