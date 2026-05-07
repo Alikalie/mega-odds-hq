@@ -169,6 +169,7 @@ export type Database = {
           away_team: string
           category: string
           created_at: string
+          hidden_from_history: boolean
           home_team: string
           id: string
           league: string
@@ -176,12 +177,14 @@ export type Database = {
           odds: string
           prediction: string
           status: Database["public"]["Enums"]["tip_status"]
+          tip_date: string
           updated_at: string
         }
         Insert: {
           away_team: string
           category: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team: string
           id?: string
           league: string
@@ -189,12 +192,14 @@ export type Database = {
           odds: string
           prediction: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Update: {
           away_team?: string
           category?: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team?: string
           id?: string
           league?: string
@@ -202,6 +207,7 @@ export type Database = {
           odds?: string
           prediction?: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Relationships: []
@@ -382,6 +388,7 @@ export type Database = {
           away_team: string
           category: string
           created_at: string
+          hidden_from_history: boolean
           home_team: string
           id: string
           league: string
@@ -389,12 +396,14 @@ export type Database = {
           odds: string
           prediction: string
           status: Database["public"]["Enums"]["tip_status"]
+          tip_date: string
           updated_at: string
         }
         Insert: {
           away_team: string
           category: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team: string
           id?: string
           league: string
@@ -402,12 +411,14 @@ export type Database = {
           odds: string
           prediction: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Update: {
           away_team?: string
           category?: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team?: string
           id?: string
           league?: string
@@ -415,6 +426,7 @@ export type Database = {
           odds?: string
           prediction?: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Relationships: []
@@ -671,6 +683,7 @@ export type Database = {
           away_team: string
           category: string
           created_at: string
+          hidden_from_history: boolean
           home_team: string
           id: string
           league: string
@@ -678,12 +691,14 @@ export type Database = {
           odds: string
           prediction: string
           status: Database["public"]["Enums"]["tip_status"]
+          tip_date: string
           updated_at: string
         }
         Insert: {
           away_team: string
           category: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team: string
           id?: string
           league: string
@@ -691,12 +706,14 @@ export type Database = {
           odds: string
           prediction: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Update: {
           away_team?: string
           category?: string
           created_at?: string
+          hidden_from_history?: boolean
           home_team?: string
           id?: string
           league?: string
@@ -704,6 +721,7 @@ export type Database = {
           odds?: string
           prediction?: string
           status?: Database["public"]["Enums"]["tip_status"]
+          tip_date?: string
           updated_at?: string
         }
         Relationships: []
