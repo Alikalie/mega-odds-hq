@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Star, Lock, Zap, Diamond, Sparkles, Shield, Loader2, Clock, Check, X, Minus, Trophy, Calendar as CalendarIcon } from "lucide-react";
+import { Star, Lock, Zap, Diamond, Sparkles, Shield, Loader2, Clock, Check, X, Minus, Trophy, Calendar as CalendarIcon, History } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -157,9 +157,12 @@ const SpecialPage = () => {
     <AppLayout>
       <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-display font-bold">Special Tips</h1>
-            <Star className="w-6 h-6 text-special" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-display font-bold">Special Tips</h1>
+              <Star className="w-6 h-6 text-special" />
+            </div>
+            <Link to="/history/special"><Button variant="outline" size="sm"><History className="w-4 h-4 mr-1" />History</Button></Link>
           </div>
           <p className="text-sm text-muted-foreground">Exclusive predictions for Special members</p>
         </motion.div>

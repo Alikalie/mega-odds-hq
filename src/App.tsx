@@ -33,6 +33,7 @@ import AdminUpgradeRequestsPage from "./pages/admin/AdminUpgradeRequestsPage";
 import AdminBookingCodesPage from "./pages/admin/AdminBookingCodesPage";
 import AdminFeatureTogglesPage from "./pages/admin/AdminFeatureTogglesPage";
 import PredictionsPage from "./pages/PredictionsPage";
+import TipsHistoryPage from "./pages/TipsHistoryPage";
 import AdminPredictionTypesPage from "./pages/admin/AdminPredictionTypesPage";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import { SuperAdminGuard } from "@/components/guards/SuperAdminGuard";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/pending-approval" element={<PendingApprovalPage />} />
             <Route path="/verify-email" element={<VerifyOTPPage />} />
+            <Route path="/history/:type" element={<TipsHistoryPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
