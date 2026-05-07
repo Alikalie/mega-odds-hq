@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
-import { Crown, Lock, Sparkles, Loader2, Clock, Check, X, Minus, Trophy, Calendar as CalendarIcon } from "lucide-react";
+import { Crown, Lock, Sparkles, Loader2, Clock, Check, X, Minus, Trophy, Calendar as CalendarIcon, History } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

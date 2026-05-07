@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Check, X, Minus, Trophy, Calendar } from "lucide-react";
+import { ArrowLeft, Clock, Check, X, Minus, Trophy, Calendar, History } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { useFreeTips } from "@/hooks/useFreeTips";
@@ -75,7 +75,10 @@ const FreeTipsPage = () => {
       <div className="px-4 py-6 space-y-4 max-w-lg mx-auto">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
           <Link to="/"><Button variant="ghost" size="sm" className="mb-2 -ml-2"><ArrowLeft className="w-4 h-4 mr-1" />Back</Button></Link>
-          <h1 className="text-xl font-display font-bold">{categoryName}</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-display font-bold">{categoryName}</h1>
+            <Link to="/history/free"><Button variant="outline" size="sm"><History className="w-4 h-4 mr-1" />History</Button></Link>
+          </div>
           <p className="text-sm text-muted-foreground">Today's predictions</p>
         </motion.div>
         {/* Booking Codes */}
