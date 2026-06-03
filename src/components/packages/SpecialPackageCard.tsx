@@ -98,6 +98,7 @@ export const SpecialPackageCard = ({ pkg, index }: SpecialPackageCardProps) => {
         isSierraLeone={isSierraLeone}
         packageName={pkg.name}
         packageId={pkg.id}
+        packagePrice={Number(pkg.price)}
         requestedTier="special"
       />
     </>
