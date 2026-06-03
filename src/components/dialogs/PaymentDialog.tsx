@@ -11,6 +11,7 @@ import { Copy, Check, Smartphone, Wallet, Phone, CreditCard, MessageCircle, Mail
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PayPalCheckout } from "@/components/payments/PayPalCheckout";
 
 interface PaymentMethod {
   id: string;
@@ -33,6 +34,7 @@ interface PaymentDialogProps {
   isSierraLeone: boolean;
   packageName?: string;
   packageId?: string;
+  packagePrice?: number;
   requestedTier?: string;
   onUpgradeRequestSent?: () => void;
   registrationEmail?: string;
@@ -54,7 +56,7 @@ const supportIconMap: Record<string, React.ComponentType<{ className?: string }>
   telegram: Send,
 };
 
-export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, requestedTier, onUpgradeRequestSent, registrationEmail, registrationName, registrationPhone, registrationCountry }: PaymentDialogProps) => {
+export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, packagePrice, requestedTier, onUpgradeRequestSent, registrationEmail, registrationName, registrationPhone, registrationCountry }: PaymentDialogProps) => {
   const { user, profile } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [supportContacts, setSupportContacts] = useState<SupportContact[]>([]);
@@ -203,9 +205,29 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
+            {requestedTier && packagePrice && packagePrice > 0 && user && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Pay instantly with PayPal</p>
+                <PayPalCheckout
+                  amount={packagePrice}
+                  description={packageName}
+                  requestedTier={requestedTier}
+                  packageId={packageId}
+                  packageName={packageName}
+                  onSuccess={() => { onUpgradeRequestSent?.(); onOpenChange(false); }}
+                />
+                <div className="flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">or pay manually</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground">
               Copy the account number and make payment via your preferred method. Then upload your proof below.
             </p>
+
 
             {paymentMethods.map((method) => {
               const IconComponent = iconMap[method.icon] || CreditCard;
@@ -313,9 +335,29 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
+          {requestedTier && packagePrice && packagePrice > 0 && user && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Pay instantly with PayPal</p>
+              <PayPalCheckout
+                amount={packagePrice}
+                description={packageName}
+                requestedTier={requestedTier}
+                packageId={packageId}
+                packageName={packageName}
+                onSuccess={() => { onUpgradeRequestSent?.(); onOpenChange(false); }}
+              />
+              <div className="flex items-center gap-2 my-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">or contact support</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+            </div>
+          )}
+
           <p className="text-sm text-muted-foreground">
             Our support team will guide you through the payment process and activate your subscription.
           </p>
+
 
           <div className="space-y-3">
             {supportContacts.map((contact) => {

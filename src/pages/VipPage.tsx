@@ -135,7 +135,7 @@ const VipPage = () => {
             ) : packages && packages.length > 0 ? (
               <div className="space-y-4">
                 {packages.map((pkg, i) => (
-                  <VipPackageCard key={pkg.id} tier="vip" title={pkg.name} price={`$${pkg.price}`} period={`${pkg.duration_days} days`} features={pkg.features} isPopular={pkg.is_popular} index={i} packageId={pkg.id} />
+                  <VipPackageCard key={pkg.id} tier="vip" title={pkg.name} price={`$${pkg.price}`} period={`${pkg.duration_days} days`} features={pkg.features} isPopular={pkg.is_popular} index={i} packageId={pkg.id} packagePrice={Number(pkg.price)} />
                 ))}
               </div>
             ) : (
