@@ -72,7 +72,8 @@ Deno.serve(async (req) => {
       requested_package_id: packageId,
       requested_package_name: packageName,
       payment_proof_url: null,
-      admin_notes: `Paid via PayPal. Order ID: ${orderId}`,
+      status: 'approved',
+      admin_notes: `Auto-approved via PayPal. Order ID: ${orderId}`,
     });
     if (insErr) {
       return new Response(JSON.stringify({ error: 'Failed to record upgrade request', details: insErr }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
