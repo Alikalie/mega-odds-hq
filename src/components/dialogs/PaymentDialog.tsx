@@ -56,7 +56,7 @@ const supportIconMap: Record<string, React.ComponentType<{ className?: string }>
   telegram: Send,
 };
 
-export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, requestedTier, onUpgradeRequestSent, registrationEmail, registrationName, registrationPhone, registrationCountry }: PaymentDialogProps) => {
+export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, packageId, packagePrice, requestedTier, onUpgradeRequestSent, registrationEmail, registrationName, registrationPhone, registrationCountry }: PaymentDialogProps) => {
   const { user, profile } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [supportContacts, setSupportContacts] = useState<SupportContact[]>([]);
