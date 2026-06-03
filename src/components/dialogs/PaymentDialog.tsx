@@ -11,6 +11,7 @@ import { Copy, Check, Smartphone, Wallet, Phone, CreditCard, MessageCircle, Mail
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PayPalCheckout } from "@/components/payments/PayPalCheckout";
 
 interface PaymentMethod {
   id: string;
@@ -33,6 +34,7 @@ interface PaymentDialogProps {
   isSierraLeone: boolean;
   packageName?: string;
   packageId?: string;
+  packagePrice?: number;
   requestedTier?: string;
   onUpgradeRequestSent?: () => void;
   registrationEmail?: string;
