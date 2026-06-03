@@ -102,6 +102,7 @@ export const VipPackageCard = ({
         isSierraLeone={isSierraLeone}
         packageName={title}
         packageId={packageId}
+        packagePrice={packagePrice}
         requestedTier={tier}
       />
     </>
