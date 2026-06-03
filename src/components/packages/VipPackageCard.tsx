@@ -15,6 +15,7 @@ interface PackageCardProps {
   isPopular?: boolean;
   index: number;
   packageId?: string;
+  packagePrice?: number;
 }
 
 export const VipPackageCard = ({
@@ -26,6 +27,7 @@ export const VipPackageCard = ({
   isPopular,
   index,
   packageId,
+  packagePrice,
 }: PackageCardProps) => {
   const { user, profile } = useAuth();
   const [showPayment, setShowPayment] = useState(false);
