@@ -205,9 +205,29 @@ export const PaymentDialog = ({ open, onOpenChange, isSierraLeone, packageName, 
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
+            {requestedTier && packagePrice && packagePrice > 0 && user && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Pay instantly with PayPal</p>
+                <PayPalCheckout
+                  amount={packagePrice}
+                  description={packageName}
+                  requestedTier={requestedTier}
+                  packageId={packageId}
+                  packageName={packageName}
+                  onSuccess={() => { onUpgradeRequestSent?.(); onOpenChange(false); }}
+                />
+                <div className="flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">or pay manually</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground">
               Copy the account number and make payment via your preferred method. Then upload your proof below.
             </p>
+
 
             {paymentMethods.map((method) => {
               const IconComponent = iconMap[method.icon] || CreditCard;
