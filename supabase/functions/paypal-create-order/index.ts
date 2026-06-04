@@ -5,8 +5,9 @@ const MODE = (Deno.env.get('PAYPAL_MODE') ?? 'sandbox').toLowerCase();
 const BASE = MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
 
 async function getAccessToken() {
-  const id = Deno.env.get('PAYPAL_CLIENT_ID')!;
-  const secret = Deno.env.get('PAYPAL_CLIENT_SECRET')!;
+  const id = Deno.env.get('PAYPAL_CLIENT_ID');
+  const secret = Deno.env.get('PAYPAL_CLIENT_SECRET');
+  if (!id || !secret) throw new Error('PayPal credentials not configured');
   const auth = btoa(`${id}:${secret}`);
   const res = await fetch(`${BASE}/v1/oauth2/token`, {
     method: 'POST',
@@ -14,7 +15,10 @@ async function getAccessToken() {
     body: 'grant_type=client_credentials',
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(`PayPal auth failed: ${JSON.stringify(data)}`);
+  if (!res.ok) {
+    console.error('PayPal auth failed', data);
+    throw new Error(`PayPal auth failed (${MODE}): ${data.error || 'unknown'} — check PAYPAL_CLIENT_ID/SECRET match PAYPAL_MODE`);
+  }
   return data.access_token as string;
 }
 
