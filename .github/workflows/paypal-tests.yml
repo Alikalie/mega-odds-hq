@@ -1,0 +1,86 @@
+name: PayPal Edge Function Tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/paypal-**"
+      - ".github/workflows/paypal-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/paypal-**"
+      - ".github/workflows/paypal-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  deno-tests:
+    name: Deno tests (paypal-create-order, paypal-capture-order)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Write .env from required secrets
+        # The test files load credentials via std/dotenv. Only the two
+        # VITE_* values are required; everything else is optional and
+        # gates the integration-tier cases. Missing secrets simply skip
+        # the corresponding tests instead of failing the job.
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PAYPAL_TEST_USER_JWT: ${{ secrets.PAYPAL_TEST_USER_JWT }}
+          PAYPAL_TEST_OTHER_USER_JWT: ${{ secrets.PAYPAL_TEST_OTHER_USER_JWT }}
+          PAYPAL_TEST_USER_ID: ${{ secrets.PAYPAL_TEST_USER_ID }}
+          PAYPAL_TEST_VIP_PACKAGE_ID: ${{ secrets.PAYPAL_TEST_VIP_PACKAGE_ID }}
+          PAYPAL_TEST_SPECIAL_PACKAGE_ID: ${{ secrets.PAYPAL_TEST_SPECIAL_PACKAGE_ID }}
+          PAYPAL_TEST_VALID_ORDER_ID: ${{ secrets.PAYPAL_TEST_VALID_ORDER_ID }}
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          PAYPAL_SANDBOX_BUYER_EMAIL: ${{ secrets.PAYPAL_SANDBOX_BUYER_EMAIL }}
+          PAYPAL_SANDBOX_BUYER_PASSWORD: ${{ secrets.PAYPAL_SANDBOX_BUYER_PASSWORD }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::Missing required secrets VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY"
+            exit 1
+          fi
+          {
+            echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL"
+            echo "VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY"
+            [ -n "$SUPABASE_SERVICE_ROLE_KEY"        ] && echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY"
+            [ -n "$PAYPAL_TEST_USER_JWT"             ] && echo "PAYPAL_TEST_USER_JWT=$PAYPAL_TEST_USER_JWT"
+            [ -n "$PAYPAL_TEST_OTHER_USER_JWT"       ] && echo "PAYPAL_TEST_OTHER_USER_JWT=$PAYPAL_TEST_OTHER_USER_JWT"
+            [ -n "$PAYPAL_TEST_USER_ID"              ] && echo "PAYPAL_TEST_USER_ID=$PAYPAL_TEST_USER_ID"
+            [ -n "$PAYPAL_TEST_VIP_PACKAGE_ID"       ] && echo "PAYPAL_TEST_VIP_PACKAGE_ID=$PAYPAL_TEST_VIP_PACKAGE_ID"
+            [ -n "$PAYPAL_TEST_SPECIAL_PACKAGE_ID"   ] && echo "PAYPAL_TEST_SPECIAL_PACKAGE_ID=$PAYPAL_TEST_SPECIAL_PACKAGE_ID"
+            [ -n "$PAYPAL_TEST_VALID_ORDER_ID"       ] && echo "PAYPAL_TEST_VALID_ORDER_ID=$PAYPAL_TEST_VALID_ORDER_ID"
+            [ -n "$PAYPAL_SANDBOX_CLIENT_ID"         ] && echo "PAYPAL_SANDBOX_CLIENT_ID=$PAYPAL_SANDBOX_CLIENT_ID"
+            [ -n "$PAYPAL_SANDBOX_CLIENT_SECRET"     ] && echo "PAYPAL_SANDBOX_CLIENT_SECRET=$PAYPAL_SANDBOX_CLIENT_SECRET"
+            [ -n "$PAYPAL_SANDBOX_BUYER_EMAIL"       ] && echo "PAYPAL_SANDBOX_BUYER_EMAIL=$PAYPAL_SANDBOX_BUYER_EMAIL"
+            [ -n "$PAYPAL_SANDBOX_BUYER_PASSWORD"    ] && echo "PAYPAL_SANDBOX_BUYER_PASSWORD=$PAYPAL_SANDBOX_BUYER_PASSWORD"
+          } > .env
+
+      - name: Report which integration cases will run
+        run: |
+          echo "## PayPal test plan" >> "$GITHUB_STEP_SUMMARY"
+          grep -q PAYPAL_TEST_USER_JWT .env             && echo "- user JWT: present (validation + tier/package/currency cases enabled)" >> "$GITHUB_STEP_SUMMARY" || echo "- user JWT: missing (those cases auto-skip)" >> "$GITHUB_STEP_SUMMARY"
+          grep -q PAYPAL_TEST_OTHER_USER_JWT .env       && echo "- other user JWT: present (ownership rejection enabled)" >> "$GITHUB_STEP_SUMMARY" || echo "- other user JWT: missing (ownership case auto-skips)" >> "$GITHUB_STEP_SUMMARY"
+          grep -q PAYPAL_SANDBOX_CLIENT_ID .env         && echo "- sandbox creds: present (end-to-end capture test enabled)" >> "$GITHUB_STEP_SUMMARY" || echo "- sandbox creds: missing (E2E auto-skips)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run PayPal Deno tests
+        run: |
+          deno test \
+            --allow-net --allow-env --allow-read \
+            supabase/functions/paypal-create-order/index_test.ts \
+            supabase/functions/paypal-capture-order/index_test.ts \
+            supabase/functions/paypal-capture-order/e2e_test.ts
+
+      - name: Cleanup .env
+        if: always()
+        run: rm -f .env
