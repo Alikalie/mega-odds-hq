@@ -110,7 +110,9 @@ export const PayPalCheckout = ({
               clientId: config.clientId,
               currency,
               intent: "capture",
-              components: "buttons",
+              components: "buttons,funding-eligibility",
+              enableFunding: "card",
+              disableFunding: "paylater,credit",
             }}
           >
             <PayPalButtons
