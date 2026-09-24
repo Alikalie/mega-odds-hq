@@ -383,6 +383,57 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          apk_enabled: boolean
+          apk_url: string
+          cookie_accept_text: string
+          cookie_bg_color: string
+          cookie_button_color: string
+          cookie_decline_text: string
+          cookie_enabled: boolean
+          cookie_message: string
+          cookie_position: string
+          cookie_style: string
+          cookie_text_color: string
+          cookie_version: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          apk_enabled?: boolean
+          apk_url?: string
+          cookie_accept_text?: string
+          cookie_bg_color?: string
+          cookie_button_color?: string
+          cookie_decline_text?: string
+          cookie_enabled?: boolean
+          cookie_message?: string
+          cookie_position?: string
+          cookie_style?: string
+          cookie_text_color?: string
+          cookie_version?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          apk_enabled?: boolean
+          apk_url?: string
+          cookie_accept_text?: string
+          cookie_bg_color?: string
+          cookie_button_color?: string
+          cookie_decline_text?: string
+          cookie_enabled?: boolean
+          cookie_message?: string
+          cookie_position?: string
+          cookie_style?: string
+          cookie_text_color?: string
+          cookie_version?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       special_tips: {
         Row: {
           away_team: string
