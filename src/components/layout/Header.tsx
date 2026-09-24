@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Info } from "lucide-react";
+import { Bell, Info, Smartphone } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { NotificationsSheet } from "@/components/notifications/NotificationsSheet";
@@ -16,6 +17,7 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const { user } = useAuth();
+  const { data: settings } = useSiteSettings();
 
   return (
     <>
@@ -37,6 +39,13 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
           </Link>
 
           <div className="flex items-center gap-1">
+            {settings?.apk_enabled && settings.apk_url && (
+              <Button variant="ghost" size="icon" asChild className="text-primary" title="Download App">
+                <a href={settings.apk_url} target="_blank" rel="noopener noreferrer" aria-label="Download App">
+                  <Smartphone className="w-5 h-5" />
+                </a>
+              </Button>
+            )}
             {showInfo && (
               <Button
                 variant="ghost"

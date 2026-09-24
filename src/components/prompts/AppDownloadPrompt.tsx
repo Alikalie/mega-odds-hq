@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const APP_DOWNLOAD_URL = "https://median.co/share/zpbywrk#apk";
 const COOKIE_KEY = "mega_odds_app_prompt";
@@ -28,6 +29,7 @@ const markVisited = () => {
 
 export const AppDownloadPrompt = () => {
   const isMobile = useIsMobile();
+  const { data: settings } = useSiteSettings();
   const [show, setShow] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(false);
 
@@ -59,7 +61,7 @@ export const AppDownloadPrompt = () => {
 
   const handleDownload = () => {
     setCookie(UPGRADE_COOKIE_KEY, "true", 1);
-    window.open(APP_DOWNLOAD_URL, "_blank");
+    window.open(settings?.apk_url || APP_DOWNLOAD_URL, "_blank");
     setShow(false);
   };
 

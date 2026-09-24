@@ -21,6 +21,7 @@ import {
   Code2,
   Settings2,
   ListOrdered,
+  Cookie,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ const allSidebarItems = [
   { icon: Code2, label: "Booking Codes", href: "/admin/booking-codes", superOnly: false },
   { icon: Settings2, label: "Feature Toggles", href: "/admin/feature-toggles", superOnly: true },
   { icon: ListOrdered, label: "Prediction Types", href: "/admin/prediction-types", superOnly: true },
+  { icon: Cookie, label: "Cookies & App Link", href: "/admin/site-settings", superOnly: true },
   { icon: Info, label: "App Info", href: "/admin/app-info", superOnly: true },
   { icon: Shield, label: "Privacy & Security", href: "/admin/privacy-security", superOnly: true },
 ];
