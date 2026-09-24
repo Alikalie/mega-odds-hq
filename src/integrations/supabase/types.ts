@@ -68,6 +68,30 @@ export type Database = {
         }
         Relationships: []
       }
+      apk_clicks: {
+        Row: {
+          apk_url: string
+          created_at: string
+          id: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          apk_url: string
+          created_at?: string
+          id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          apk_url?: string
+          created_at?: string
+          id?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_information: {
         Row: {
           content: string
@@ -386,6 +410,8 @@ export type Database = {
       site_settings: {
         Row: {
           apk_enabled: boolean
+          apk_icon_url: string | null
+          apk_label: string
           apk_url: string
           cookie_accept_text: string
           cookie_bg_color: string
@@ -402,6 +428,8 @@ export type Database = {
         }
         Insert: {
           apk_enabled?: boolean
+          apk_icon_url?: string | null
+          apk_label?: string
           apk_url?: string
           cookie_accept_text?: string
           cookie_bg_color?: string
@@ -418,6 +446,8 @@ export type Database = {
         }
         Update: {
           apk_enabled?: boolean
+          apk_icon_url?: string | null
+          apk_label?: string
           apk_url?: string
           cookie_accept_text?: string
           cookie_bg_color?: string

@@ -8,6 +8,13 @@
       "when": 1790227087466,
       "tag": "0000_site_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790227315824,
+      "tag": "0001_apk_tracking_icon",
+      "breakpoints": true
     }
   ]
 }
