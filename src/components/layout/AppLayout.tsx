@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { InfoDialog } from "@/components/dialogs/InfoDialog";
+import { CookieConsent } from "@/components/prompts/CookieConsent";
 import { AppDownloadPrompt } from "@/components/prompts/AppDownloadPrompt";
 
 interface AppLayoutProps {
@@ -28,6 +29,7 @@ export const AppLayout = ({
       {showNav && <BottomNav />}
       <InfoDialog open={infoOpen} onOpenChange={setInfoOpen} />
       <AppDownloadPrompt />
+      <CookieConsent />
     </div>
   );
 };

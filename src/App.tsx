@@ -18,6 +18,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminTipsPage from "./pages/admin/AdminTipsPage";
 import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
 import AdminAppInfoPage from "./pages/admin/AdminAppInfoPage";
+import AdminSiteSettingsPage from "./pages/admin/AdminSiteSettingsPage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminPackagesPage from "./pages/admin/AdminPackagesPage";
 import AdminSubscriptionsPage from "./pages/admin/AdminSubscriptionsPage";
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
             <Route path="/admin/payments" element={<SuperAdminGuard><AdminPaymentsPage /></SuperAdminGuard>} />
             <Route path="/admin/roles" element={<SuperAdminGuard><AdminRolesPage /></SuperAdminGuard>} />
+            <Route path="/admin/site-settings" element={<SuperAdminGuard><AdminSiteSettingsPage /></SuperAdminGuard>} />
             <Route path="/admin/app-info" element={<SuperAdminGuard><AdminAppInfoPage /></SuperAdminGuard>} />
             <Route path="/admin/privacy-security" element={<SuperAdminGuard><AdminPrivacySecurityPage /></SuperAdminGuard>} />
             <Route path="/admin/upgrade-requests" element={<SuperAdminGuard><AdminUpgradeRequestsPage /></SuperAdminGuard>} />
