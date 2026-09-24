@@ -4,6 +4,7 @@ import { Download, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { isValidApkUrl, trackApkClick } from "@/lib/apk";
 
 const APP_DOWNLOAD_URL = "https://median.co/share/zpbywrk#apk";
 const COOKIE_KEY = "mega_odds_app_prompt";
@@ -36,6 +37,7 @@ export const AppDownloadPrompt = () => {
   useEffect(() => {
     // Don't show on desktop/big screens
     if (!isMobile) return;
+    if (settings && !settings.apk_enabled) return;
 
     // Check if user already clicked upgrade today
     const upgradeClicked = getCookie(UPGRADE_COOKIE_KEY);
@@ -57,11 +59,13 @@ export const AppDownloadPrompt = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [isMobile]);
+  }, [isMobile, settings]);
 
   const handleDownload = () => {
     setCookie(UPGRADE_COOKIE_KEY, "true", 1);
-    window.open(settings?.apk_url || APP_DOWNLOAD_URL, "_blank");
+    const url = isValidApkUrl(settings?.apk_url) ? settings!.apk_url : APP_DOWNLOAD_URL;
+    trackApkClick(url);
+    window.open(url, "_blank");
     setShow(false);
   };
 
