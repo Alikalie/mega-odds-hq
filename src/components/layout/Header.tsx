@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Info, Smartphone } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { isValidApkUrl, trackApkClick } from "@/lib/apk";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { NotificationsSheet } from "@/components/notifications/NotificationsSheet";
@@ -39,10 +40,20 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
           </Link>
 
           <div className="flex items-center gap-1">
-            {settings?.apk_enabled && settings.apk_url && (
-              <Button variant="ghost" size="icon" asChild className="text-primary" title="Download App">
-                <a href={settings.apk_url} target="_blank" rel="noopener noreferrer" aria-label="Download App">
-                  <Smartphone className="w-5 h-5" />
+            {settings?.apk_enabled && isValidApkUrl(settings.apk_url) && (
+              <Button variant="ghost" size="icon" asChild className="text-primary" title={settings.apk_label}>
+                <a
+                  href={settings.apk_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={settings.apk_label}
+                  onClick={() => trackApkClick(settings.apk_url, user?.id)}
+                >
+                  {settings.apk_icon_url ? (
+                    <img src={settings.apk_icon_url} alt={settings.apk_label} className="w-6 h-6 rounded object-cover" />
+                  ) : (
+                    <Smartphone className="w-5 h-5" />
+                  )}
                 </a>
               </Button>
             )}
