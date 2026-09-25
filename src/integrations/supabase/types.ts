@@ -412,6 +412,7 @@ export type Database = {
           apk_enabled: boolean
           apk_icon_url: string | null
           apk_label: string
+          apk_prompt_enabled: boolean
           apk_url: string
           cookie_accept_text: string
           cookie_bg_color: string
@@ -430,6 +431,7 @@ export type Database = {
           apk_enabled?: boolean
           apk_icon_url?: string | null
           apk_label?: string
+          apk_prompt_enabled?: boolean
           apk_url?: string
           cookie_accept_text?: string
           cookie_bg_color?: string
@@ -448,6 +450,7 @@ export type Database = {
           apk_enabled?: boolean
           apk_icon_url?: string | null
           apk_label?: string
+          apk_prompt_enabled?: boolean
           apk_url?: string
           cookie_accept_text?: string
           cookie_bg_color?: string

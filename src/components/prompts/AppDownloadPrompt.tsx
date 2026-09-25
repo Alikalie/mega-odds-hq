@@ -37,7 +37,7 @@ export const AppDownloadPrompt = () => {
   useEffect(() => {
     // Don't show on desktop/big screens
     if (!isMobile) return;
-    if (settings && !settings.apk_enabled) return;
+    if (!settings || !settings.apk_enabled || !(settings as any).apk_prompt_enabled) return;
 
     // Check if user already clicked upgrade today
     const upgradeClicked = getCookie(UPGRADE_COOKIE_KEY);

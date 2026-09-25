@@ -50,25 +50,34 @@ const PrivacySecurityPage = () => {
             No privacy & security information available yet.
           </div>
         ) : (
-          <div className="space-y-4">
-            {sections.map((section, i) => (
-              <motion.div
-                key={section.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass-card rounded-xl p-5"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield className="w-5 h-5 text-primary" />
-                  <h3 className="font-display font-bold">{section.title}</h3>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card rounded-2xl overflow-hidden"
+          >
+            <div className="flex items-center gap-3 p-5 border-b border-border bg-primary/5">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold">Our Privacy & Security Notes</h2>
+                <p className="text-xs text-muted-foreground">{sections.length} section{sections.length === 1 ? "" : "s"}</p>
+              </div>
+            </div>
+            <div className="divide-y divide-border">
+              {sections.map((section, i) => (
+                <div key={section.id} className="p-5">
+                  <h3 className="font-display font-semibold mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center shrink-0">{i + 1}</span>
+                    {section.title}
+                  </h3>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed pl-8">
+                    {section.content}
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {section.content}
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </motion.div>
         )}
       </div>
     </AppLayout>

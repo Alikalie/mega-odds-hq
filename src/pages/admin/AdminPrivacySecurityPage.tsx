@@ -94,41 +94,35 @@ const AdminPrivacySecurityPage = () => {
             </Button>
           </div>
 
-          <div className="glass-card rounded-xl overflow-hidden">
-            {isLoading ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Content Preview</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-24">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sections.map((s) => (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.title}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-muted-foreground">{s.content}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${s.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {s.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEdit(s)}><Edit className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
+          ) : sections.length === 0 ? (
+            <div className="glass-card rounded-xl p-6 text-center text-muted-foreground">No sections yet. Add your first one.</div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {sections.map((s) => (
+                <div key={s.id} className="glass-card rounded-xl p-4 flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-display font-semibold flex items-center gap-2 min-w-0">
+                      <Shield className="w-4 h-4 text-primary shrink-0" />
+                      <span className="break-words">{s.title}</span>
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded-full text-xs shrink-0 ${s.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {s.is_active ? "Active" : "Hidden"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-6 flex-1">{s.content}</p>
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs text-muted-foreground">Order: {s.display_order}</span>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Edit className="w-4 h-4 mr-1" />Edit</Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

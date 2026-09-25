@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { WhatsAppIcon, GmailIcon, TelegramIcon } from "@/components/icons/BrandIcons";
 
 interface SupportContact {
   id: string;
@@ -20,6 +21,13 @@ const iconMap: Record<string, React.ElementType> = {
   telegram: Send,
   phone: Phone,
 };
+
+const brandMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  whatsapp: WhatsAppIcon,
+  email: GmailIcon,
+  telegram: TelegramIcon,
+};
+
 
 const HelpSupportPage = () => {
   const navigate = useNavigate();
@@ -74,6 +82,8 @@ const HelpSupportPage = () => {
           <div className="space-y-3">
             {contacts.map((contact, i) => {
               const Icon = iconMap[contact.type] || Phone;
+              const BrandIcon = brandMap[contact.type];
+              const hideValue = ["whatsapp", "email"].includes(contact.type) || /chat\.whatsapp|wa\.me|whatsapp/i.test(contact.value);
               return (
                 <motion.div
                   key={contact.id}
@@ -82,12 +92,16 @@ const HelpSupportPage = () => {
                   transition={{ delay: i * 0.05 }}
                   className="glass-card rounded-xl p-4 flex items-center gap-4"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Icon className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                    {BrandIcon ? <BrandIcon className="w-8 h-8" /> : <Icon className="w-6 h-6 text-primary" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold capitalize">{contact.label || contact.type}</p>
-                    <p className="text-sm text-muted-foreground truncate">{contact.value}</p>
+                    {hideValue ? (
+                      <p className="text-sm text-muted-foreground">Tap to open</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground truncate">{contact.value}</p>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => copyToClipboard(contact.value)}>

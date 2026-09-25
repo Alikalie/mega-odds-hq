@@ -110,6 +110,13 @@ const AdminSiteSettingsPage = () => {
               <Switch checked={f.apk_enabled} onCheckedChange={(v) => set("apk_enabled", v)} />
             </div>
             <p className="text-xs text-muted-foreground">{f.apk_enabled ? "Enabled — icon shows in the top bar" : "Disabled — icon and download pop-up are hidden"}</p>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium">Show "Download / Update app" pop-up</p>
+                <p className="text-xs text-muted-foreground">Off by default. Turn on only when you want to remind phone users.</p>
+              </div>
+              <Switch checked={!!f.apk_prompt_enabled} onCheckedChange={(v) => set("apk_prompt_enabled", v)} />
+            </div>
             <div>
               <Label>Download URL</Label>
               <Input placeholder="https://..." value={f.apk_url} onChange={(e) => set("apk_url", e.target.value)} className={apkError ? "border-destructive" : ""} />
