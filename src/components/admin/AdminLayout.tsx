@@ -77,7 +77,7 @@ export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 lg:translate-x-0 lg:static",
+          "fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-card border-r border-border transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -110,6 +110,7 @@ export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 <Link
                   key={item.href}
                   to={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
                     isActive
@@ -139,10 +140,10 @@ export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen">
+      <main className="flex-1 min-w-0 min-h-screen">
         {/* Top Bar */}
         <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Button
               variant="ghost"
               size="icon"
@@ -151,23 +152,23 @@ export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-display font-bold">{title}</h1>
+            <h1 className="text-base sm:text-lg font-display font-bold truncate">{title}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <div className="text-right mr-2">
+            <div className="text-right mr-2 hidden sm:block">
               <p className="text-sm font-medium">{profile?.full_name || "Admin"}</p>
               <p className="text-xs text-muted-foreground">
                 {isSuperAdmin ? "Super Admin" : "Admin"}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground font-bold">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground font-bold">
               {(profile?.full_name?.[0] || "A").toUpperCase()}
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <div className="p-4 lg:p-6">
+        <div className="p-3 sm:p-4 lg:p-6 overflow-x-auto">
           {children}
         </div>
       </main>
