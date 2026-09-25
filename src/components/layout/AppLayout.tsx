@@ -4,6 +4,7 @@ import { BottomNav } from "./BottomNav";
 import { InfoDialog } from "@/components/dialogs/InfoDialog";
 import { CookieConsent } from "@/components/prompts/CookieConsent";
 import { AppDownloadPrompt } from "@/components/prompts/AppDownloadPrompt";
+import { WebNotificationPrompt } from "@/components/prompts/WebNotificationPrompt";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export const AppLayout = ({
       <InfoDialog open={infoOpen} onOpenChange={setInfoOpen} />
       <AppDownloadPrompt />
       <CookieConsent />
+      <WebNotificationPrompt />
     </div>
   );
 };
