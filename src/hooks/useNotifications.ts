@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { showWebNotification } from "@/lib/webNotifications";
+
+// Shared across hook instances so one notification only pops once
+const shownIds = new Set<string>();
 
 export const useNotifications = () => {
   const { user } = useAuth();
@@ -21,8 +25,12 @@ export const useNotifications = () => {
             table: "notifications",
             filter: `user_id=eq.${user.id}`,
           },
-          () => {
+          (payload: any) => {
             fetchUnreadCount();
+            if (payload.eventType === "INSERT" && payload.new && !shownIds.has(payload.new.id)) {
+              shownIds.add(payload.new.id);
+              showWebNotification(payload.new.title || "Mega Odds", payload.new.message || "");
+            }
           }
         )
         .subscribe();
