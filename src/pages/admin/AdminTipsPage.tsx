@@ -49,6 +49,7 @@ import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { sendPush } from "@/lib/webNotifications";
 import { useTipCategories } from "@/hooks/useTipCategories";
 import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
