@@ -18,6 +18,7 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CategoryIcon } from "@/components/icons/SportIcons";
 
 // Icon map for dynamic icon rendering
 const iconMap: Record<string, LucideIcon> = {
@@ -71,8 +72,7 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
   return (
     <div className="grid grid-cols-3 gap-2">
       {categories.map((category, index) => {
-        const IconComponent = iconMap[category.icon] || Trophy;
-        const href = category.is_vip
+                const href = category.is_vip
           ? `/vip?category=${category.slug}`
           : category.is_special
           ? `/special?category=${category.slug}`
@@ -122,9 +122,10 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
                       : "bg-primary/10"
                   )}
                 >
-                  <IconComponent
-                    className={cn(
-                      "w-5 h-5",
+                  <CategoryIcon
+                    icon={category.icon}
+                    className="w-7 h-7"
+                    tintClass={cn(
                       category.is_vip
                         ? "text-vip"
                         : category.is_special

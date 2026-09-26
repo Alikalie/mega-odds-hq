@@ -49,6 +49,7 @@ import { AdminGuard } from "@/components/guards/AdminGuard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { sendPush } from "@/lib/webNotifications";
 import { useTipCategories } from "@/hooks/useTipCategories";
 import { useFixtures } from "@/hooks/useFixtures";
 import { LEAGUES, getFlagEmoji } from "@/lib/leagues";
@@ -283,6 +284,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
             message: `${newTip.homeTeam} vs ${newTip.awayTeam} — ${newTip.prediction} @ ${newTip.odds}`,
           }));
           await supabase.from("notifications").insert(notifications);
+          sendPush({ user_ids: profiles.map((p) => p.id), title: notifications[0].title, message: notifications[0].message, url: tipType === "free" ? "/free-tips" : `/${tipType}` });
         }
       } catch (notifErr) {
         console.error("Error sending notifications:", notifErr);

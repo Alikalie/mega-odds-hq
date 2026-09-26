@@ -109,6 +109,7 @@ const AdminNotificationsPage = () => {
           .insert(notificationsToInsert);
 
         if (error) throw error;
+        sendPush({ all: true, title: formData.title, message: formData.message });
         toast.success(`Notification sent to ${users.length} users`);
       } else {
         // Send to single user
@@ -119,6 +120,7 @@ const AdminNotificationsPage = () => {
         });
 
         if (error) throw error;
+        sendPush({ user_ids: [formData.userId], title: formData.title, message: formData.message });
         toast.success("Notification sent");
       }
 
