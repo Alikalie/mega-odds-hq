@@ -48,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { IconPicker, CategoryIcon } from "@/components/icons/SportIcons";
 import { AdminGuard } from "@/components/guards/AdminGuard";
 import {
   useTipCategories,
@@ -94,7 +95,7 @@ const AdminCategoriesPage = () => {
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    icon: "Trophy",
+    icon: "sport:football",
     description: "",
     is_vip: false,
     is_special: false,
@@ -112,7 +113,7 @@ const AdminCategoriesPage = () => {
     setFormData({
       name: "",
       slug: "",
-      icon: "Trophy",
+      icon: "sport:football",
       description: "",
       is_vip: false,
       is_special: false,
@@ -424,21 +425,7 @@ const AdminCategoriesPage = () => {
               </div>
               <div>
                 <Label htmlFor="icon">Icon</Label>
-                <Select
-                  value={formData.icon}
-                  onValueChange={(value) => setFormData({ ...formData, icon: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {iconOptions.map((icon) => (
-                      <SelectItem key={icon} value={icon}>
-                        {icon}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <IconPicker value={formData.icon} onChange={(value) => setFormData({ ...formData, icon: value })} />
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -516,21 +503,7 @@ const AdminCategoriesPage = () => {
               </div>
               <div>
                 <Label htmlFor="edit-icon">Icon</Label>
-                <Select
-                  value={formData.icon}
-                  onValueChange={(value) => setFormData({ ...formData, icon: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {iconOptions.map((icon) => (
-                      <SelectItem key={icon} value={icon}>
-                        {icon}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <IconPicker value={formData.icon} onChange={(value) => setFormData({ ...formData, icon: value })} />
               </div>
               <div>
                 <Label htmlFor="edit-description">Description</Label>
