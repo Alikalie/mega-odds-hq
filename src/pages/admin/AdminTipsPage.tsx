@@ -284,6 +284,7 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
             message: `${newTip.homeTeam} vs ${newTip.awayTeam} — ${newTip.prediction} @ ${newTip.odds}`,
           }));
           await supabase.from("notifications").insert(notifications);
+          sendPush({ user_ids: profiles.map((p) => p.id), title: notifications[0].title, message: notifications[0].message, url: tipType === "free" ? "/free-tips" : `/${tipType}` });
         }
       } catch (notifErr) {
         console.error("Error sending notifications:", notifErr);
