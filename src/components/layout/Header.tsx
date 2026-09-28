@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Info, Smartphone } from "lucide-react";
