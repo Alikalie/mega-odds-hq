@@ -9,6 +9,7 @@ import {
   Check,
   ChevronsUpDown,
   CalendarIcon,
+  Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -306,6 +307,32 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
     } catch (err) {
       console.error("Error deleting tip:", err);
       toast.error("Failed to delete tip");
+    }
+  };
+
+  const [aiChecking, setAiChecking] = useState<string | null>(null);
+  const handleAiCheck = async (tip: TipWithCategory) => {
+    setAiChecking(tip.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-tip-outcome", {
+        body: { homeTeam: tip.homeTeam, awayTeam: tip.awayTeam, prediction: tip.prediction, league: tip.league, matchTime: tip.matchTime, matchDate: (tip as any).tipDate },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      const st = data.status as Tip["status"];
+      const summary = `${data.score ? data.score + " — " : ""}${data.reason || ""}`;
+      if (st === "pending") {
+        toast.info("AI: result not available yet", { description: summary });
+      } else {
+        toast(`AI suggests: ${st.toUpperCase()}${data.confidence ? ` (${data.confidence})` : ""}`, {
+          description: summary,
+          action: { label: "Apply", onClick: () => handleUpdateStatus(tip.id, st) },
+          duration: 15000,
+        });
+      }
+    } catch (e: any) {
+      toast.error("AI check failed: " + (e?.message || "unknown error"));
+    } finally {
+      setAiChecking(null);
     }
   };
 
@@ -631,6 +658,9 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                         <SelectItem value="void">Void</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" title="Check result with AI" disabled={aiChecking === tip.id} onClick={() => handleAiCheck(tip)}>
+                      {aiChecking === tip.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDeleteTip(tip.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>

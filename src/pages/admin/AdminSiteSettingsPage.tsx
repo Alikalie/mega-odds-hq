@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { validateApkUrl } from "@/lib/apk";
+import { DEFAULT_LOGO_URL } from "@/components/brand/BrandLogo";
 import { Smartphone, Upload, MousePointerClick } from "lucide-react";
 
 const AdminSiteSettingsPage = () => {
@@ -50,6 +51,19 @@ const AdminSiteSettingsPage = () => {
     toast.success("Icon uploaded — click Save to apply");
   };
 
+  const uploadLogo = async (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 3 * 1024 * 1024) return toast.error("Logo must be under 3 MB");
+    setUploading(true);
+    const path = `site-logo/${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, "_")}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    setUploading(false);
+    if (error) return toast.error("Upload failed: " + error.message);
+    set("logo_url", supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl);
+    toast.success("Logo uploaded — click Save to apply");
+  };
+
   const apkError = f?.apk_enabled ? validateApkUrl(f?.apk_url) : null;
 
   const set = (k: string, v: any) => setF((p: any) => ({ ...p, [k]: v }));
@@ -67,11 +81,26 @@ const AdminSiteSettingsPage = () => {
   };
 
   return (
-    <AdminLayout title="Cookies & App Link">
+    <AdminLayout title="Logo, Cookies & App Link">
       {isLoading || !f ? (
         <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mt-20" />
       ) : (
         <div className="max-w-2xl space-y-6">
+          <section className="glass-card rounded-xl p-5 space-y-4">
+            <h2 className="font-display font-bold">App Logo</h2>
+            <p className="text-xs text-muted-foreground">Shown in the top bar, login/registration and admin panel.</p>
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center overflow-hidden">
+                <img src={f.logo_url || DEFAULT_LOGO_URL} alt="Logo" className="w-full h-full object-contain" />
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm cursor-pointer border border-input rounded-md px-3 h-9">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} Replace logo
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadLogo(e.target.files?.[0])} />
+              </label>
+              {f.logo_url && <Button variant="ghost" size="sm" onClick={() => set("logo_url", null)}>Use default</Button>}
+            </div>
+          </section>
+
           <section className="glass-card rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display font-bold">Cookie Banner</h2>
