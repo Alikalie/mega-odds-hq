@@ -1,3 +1,5 @@
+import AskTipsPage from "./pages/AskTipsPage";
+import { DynamicAppIcons } from "@/components/brand/DynamicAppIcons";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -48,6 +50,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <DynamicAppIcons />
           <Routes>
             {/* User Routes */}
             <Route path="/" element={<Index />} />
@@ -64,6 +67,7 @@ const App = () => (
             <Route path="/pending-approval" element={<PendingApprovalPage />} />
             <Route path="/verify-email" element={<VerifyOTPPage />} />
             <Route path="/history/:type" element={<TipsHistoryPage />} />
+            <Route path="/ask" element={<AskTipsPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />

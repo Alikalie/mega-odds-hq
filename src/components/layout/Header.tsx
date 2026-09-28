@@ -1,7 +1,7 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Info, Smartphone } from "lucide-react";
+import { Bell, Info, Smartphone, Sparkles } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { isValidApkUrl, trackApkClick } from "@/lib/apk";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,11 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
                     <Smartphone className="w-5 h-5" />
                   )}
                 </a>
+              </Button>
+            )}
+            {user && (
+              <Button variant="ghost" size="icon" asChild className="text-primary" title="Ask about tips">
+                <Link to="/ask" aria-label="Ask about tips"><Sparkles className="w-5 h-5" /></Link>
               </Button>
             )}
             {showInfo && (
