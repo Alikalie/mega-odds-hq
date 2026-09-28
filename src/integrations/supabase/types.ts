@@ -455,6 +455,7 @@ export type Database = {
           cookie_text_color: string
           cookie_version: number
           id: number
+          logo_url: string | null
           updated_at: string
         }
         Insert: {
@@ -474,6 +475,7 @@ export type Database = {
           cookie_text_color?: string
           cookie_version?: number
           id?: number
+          logo_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -493,6 +495,7 @@ export type Database = {
           cookie_text_color?: string
           cookie_version?: number
           id?: number
+          logo_url?: string | null
           updated_at?: string
         }
         Relationships: []
