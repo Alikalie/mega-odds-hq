@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -186,9 +187,7 @@ const AuthPage = () => {
         >
           {/* Logo */}
           <div className="text-center space-y-2">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-glow-primary">
-              <span className="text-primary-foreground font-bold text-2xl">M</span>
-            </div>
+            <BrandLogo className="w-24 h-24 mx-auto" />
             <h1 className="text-2xl font-display font-bold">
               {mode === "login" ? "Welcome Back" : "Create Account"}
             </h1>

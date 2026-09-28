@@ -30,9 +30,7 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-2"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-glow-primary">
-                <span className="text-primary-foreground font-bold text-sm">M</span>
-              </div>
+              <BrandLogo className="w-10 h-10" />
               <span className="font-display font-bold text-lg tracking-tight">
                 MEGA <span className="text-primary">ODDS</span>
               </span>
