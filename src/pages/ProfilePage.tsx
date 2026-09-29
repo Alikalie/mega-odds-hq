@@ -15,6 +15,8 @@ import {
   Star,
   Loader2,
   LayoutDashboard,
+  Smartphone,
+  Sparkles,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,8 @@ import { Switch } from "@/components/ui/switch";
 import { AnnouncementCard, Announcement } from "@/components/cards/AnnouncementCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { isValidApkUrl, trackApkClick } from "@/lib/apk";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -38,6 +42,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, profile, isLoading, isAdmin, signOut } = useAuth();
   const { theme, toggleTheme, isDark } = useTheme();
+  const { data: settings } = useSiteSettings();
    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
  
    useEffect(() => {
@@ -213,6 +218,41 @@ const ProfilePage = () => {
           </div>
           <Switch checked={isDark} onCheckedChange={toggleTheme} />
         </motion.div>
+
+        {/* App download + AI assistant */}
+        <div className="space-y-2">
+          {settings?.apk_enabled && isValidApkUrl(settings.apk_url) && (
+            <a
+              href={settings.apk_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackApkClick(settings.apk_url, user?.id)}
+              className="flex items-center gap-4 p-4 glass-card rounded-xl hover:bg-secondary/50 transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center overflow-hidden">
+                {settings.apk_icon_url ? (
+                  <img src={settings.apk_icon_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Smartphone className="w-5 h-5 text-primary" />
+                )}
+              </div>
+              <span className="flex-1 font-medium">{settings.apk_label || "Download App"}</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </a>
+          )}
+          {user && (
+            <Link
+              to="/ask"
+              className="flex items-center gap-4 p-4 glass-card rounded-xl hover:bg-secondary/50 transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <span className="flex-1 font-medium">AI Tips Assistant</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          )}
+        </div>
 
         {/* Menu Items */}
         <motion.div
