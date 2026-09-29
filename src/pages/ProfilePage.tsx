@@ -222,23 +222,37 @@ const ProfilePage = () => {
         {/* App download + AI assistant */}
         <div className="space-y-2">
           {settings?.apk_enabled && isValidApkUrl(settings.apk_url) && (
-            <a
-              href={settings.apk_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackApkClick(settings.apk_url, user?.id)}
-              className="flex items-center gap-4 p-4 glass-card rounded-xl hover:bg-secondary/50 transition-all"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center overflow-hidden">
-                {settings.apk_icon_url ? (
-                  <img src={settings.apk_icon_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <Smartphone className="w-5 h-5 text-primary" />
-                )}
+            <div className="rounded-2xl p-5 bg-gradient-to-br from-primary/25 via-primary/10 to-transparent border border-primary/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center overflow-hidden">
+                  {settings.apk_icon_url ? (
+                    <img src={settings.apk_icon_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <Smartphone className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-display font-bold">Get the Mega Odds App</h3>
+                  <p className="text-xs text-muted-foreground">Faster tips and instant alerts on your phone</p>
+                </div>
               </div>
-              <span className="flex-1 font-medium">{settings.apk_label || "Download App"}</span>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </a>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="hero" asChild>
+                  <a
+                    href={settings.apk_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackApkClick(settings.apk_url, user?.id)}
+                  >
+                    {settings.apk_label || "Download for Android"}
+                  </a>
+                </Button>
+                <Button variant="outline" disabled className="flex-col h-auto py-2 leading-tight">
+                  <span>iOS App</span>
+                  <span className="text-[10px] text-muted-foreground">Coming soon</span>
+                </Button>
+              </div>
+            </div>
           )}
           {user && (
             <Link
