@@ -8,8 +8,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
+      icon: "/icon-512.png",
+      badge: "/icon-512.png",
       data: { url: data.url || "/" },
       tag: `${Date.now()}`,
     })
