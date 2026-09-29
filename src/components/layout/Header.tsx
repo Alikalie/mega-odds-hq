@@ -39,28 +39,6 @@ export const Header = ({ showInfo = true, onInfoClick }: HeaderProps) => {
           </Link>
 
           <div className="flex items-center gap-1">
-            {settings?.apk_enabled && isValidApkUrl(settings.apk_url) && (
-              <Button variant="ghost" size="icon" asChild className="text-primary" title={settings.apk_label}>
-                <a
-                  href={settings.apk_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={settings.apk_label}
-                  onClick={() => trackApkClick(settings.apk_url, user?.id)}
-                >
-                  {settings.apk_icon_url ? (
-                    <img src={settings.apk_icon_url} alt={settings.apk_label} className="w-6 h-6 rounded object-cover" />
-                  ) : (
-                    <Smartphone className="w-5 h-5" />
-                  )}
-                </a>
-              </Button>
-            )}
-            {user && (
-              <Button variant="ghost" size="icon" asChild className="text-primary" title="Ask about tips">
-                <Link to="/ask" aria-label="Ask about tips"><Sparkles className="w-5 h-5" /></Link>
-              </Button>
-            )}
             {showInfo && (
               <Button
                 variant="ghost"
