@@ -70,7 +70,7 @@ export const showWebNotification = async (title: string, body: string, url = "/"
   if (!supported() || Notification.permission !== "granted") return;
   // When the page is hidden, the push message from the server will show it instead.
   if (document.visibilityState === "hidden" && swReg?.pushManager && (await swReg.pushManager.getSubscription())) return;
-  const options: NotificationOptions = { body, icon: "/favicon.ico", badge: "/favicon.ico", data: { url }, tag: `${Date.now()}` };
+  const options: NotificationOptions = { body, icon: "/icon-512.png", badge: "/icon-512.png", data: { url }, tag: `${Date.now()}` };
   try {
     const reg = swReg || (await navigator.serviceWorker?.getRegistration("/notification-sw.js"));
     if (reg) return reg.showNotification(title, options);
