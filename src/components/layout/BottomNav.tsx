@@ -1,4 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { InterstitialAd } from "@/components/ads/InterstitialAd";
 import { Trophy, Crown, Star, User, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -11,9 +14,15 @@ const baseNavItems = [
   { path: "/profile", icon: User, label: "Profile" },
 ];
 
+const AD_PATHS = ["/free-tips", "/predictions"];
+
 export const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const predictionsEnabled = useFeatureEnabled("predictions");
+  const { data: settings } = useSiteSettings();
+  const [pending, setPending] = useState<string | null>(null);
+  const adOn = (settings as any)?.interstitial_ad_enabled !== false;
 
   const navItems = predictionsEnabled
     ? [
@@ -24,6 +33,16 @@ export const BottomNav = () => {
     : baseNavItems;
 
   return (
+    <>
+    <InterstitialAd
+      open={!!pending}
+      slot={(settings as any)?.interstitial_ad_slot}
+      onClose={() => {
+        const p = pending;
+        setPending(null);
+        if (p) navigate(p);
+      }}
+    />
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-area-pb">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map((item) => {
@@ -34,6 +53,12 @@ export const BottomNav = () => {
             <Link
               key={item.path}
               to={item.path}
+              onClick={(e) => {
+                if (adOn && AD_PATHS.includes(item.path)) {
+                  e.preventDefault();
+                  setPending(item.path);
+                }
+              }}
               className={cn(
                 "relative flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-200 tap-highlight",
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
@@ -70,5 +95,6 @@ export const BottomNav = () => {
         })}
       </div>
     </nav>
+    </>
   );
 };

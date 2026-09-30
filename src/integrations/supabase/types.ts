@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          id: string
+          record_id: string | null
+          summary: string | null
+          table_name: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          record_id?: string | null
+          summary?: string | null
+          table_name: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          record_id?: string | null
+          summary?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       admin_feature_access: {
         Row: {
           admin_id: string
@@ -455,6 +491,8 @@ export type Database = {
           cookie_text_color: string
           cookie_version: number
           id: number
+          interstitial_ad_enabled: boolean
+          interstitial_ad_slot: string | null
           logo_url: string | null
           updated_at: string
         }
@@ -475,6 +513,8 @@ export type Database = {
           cookie_text_color?: string
           cookie_version?: number
           id?: number
+          interstitial_ad_enabled?: boolean
+          interstitial_ad_slot?: string | null
           logo_url?: string | null
           updated_at?: string
         }
@@ -495,6 +535,8 @@ export type Database = {
           cookie_text_color?: string
           cookie_version?: number
           id?: number
+          interstitial_ad_enabled?: boolean
+          interstitial_ad_slot?: string | null
           logo_url?: string | null
           updated_at?: string
         }

@@ -11,7 +11,12 @@ import {
   Megaphone,
   ArrowUpCircle,
   Loader2,
+  Send,
+  Code2,
+  Shield,
+  Settings2,
 } from "lucide-react";
+import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AdminGuard } from "@/components/guards/AdminGuard";
@@ -29,7 +34,7 @@ interface Activity {
 }
 
 const AdminDashboard = () => {
-  const { profile } = useAuth();
+  const { profile, isSuperAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 0,
     vipMembers: 0,
@@ -217,21 +222,29 @@ const AdminDashboard = () => {
           {/* Quick Actions */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="glass-card rounded-xl p-6">
             <h3 className="font-display font-bold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <Button variant="outline" asChild>
-                <Link to="/admin/users"><Users className="w-4 h-4 mr-2" />Manage Users</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/admin/free-tips"><Trophy className="w-4 h-4 mr-2" />Add Free Tip</Link>
-              </Button>
-              <Button variant="vip" asChild>
-                <Link to="/admin/vip-tips"><Crown className="w-4 h-4 mr-2" />Add VIP Tip</Link>
-              </Button>
-              <Button variant="special" asChild>
-                <Link to="/admin/special-tips"><Star className="w-4 h-4 mr-2" />Add Special Tip</Link>
-              </Button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {[
+                { to: "/admin/free-tips", icon: Trophy, label: "Add Free Tip", variant: "outline" },
+                { to: "/admin/vip-tips", icon: Crown, label: "Add VIP Tip", variant: "vip" },
+                { to: "/admin/special-tips", icon: Star, label: "Add Special Tip", variant: "special" },
+                { to: "/admin/users", icon: Users, label: "Manage Users", variant: "outline" },
+                { to: "/admin/announcements", icon: Megaphone, label: "Post Announcement", variant: "outline" },
+                { to: "/admin/notifications", icon: Send, label: "Send Notification", variant: "outline" },
+                { to: "/admin/booking-codes", icon: Code2, label: "Booking Codes", variant: "outline" },
+                ...(isSuperAdmin ? [
+                  { to: "/admin/upgrade-requests", icon: ArrowUpCircle, label: "Upgrade Requests", variant: "outline" },
+                  { to: "/admin/roles", icon: Shield, label: "Admin Roles", variant: "outline" },
+                  { to: "/admin/site-settings", icon: Settings2, label: "Site & Ads", variant: "outline" },
+                ] : []),
+              ].map((a) => (
+                <Button key={a.to} variant={a.variant as any} className="h-auto py-3 justify-start" asChild>
+                  <Link to={a.to}><a.icon className="w-4 h-4 mr-2 shrink-0" /><span className="truncate">{a.label}</span></Link>
+                </Button>
+              ))}
             </div>
           </motion.div>
+
+          <AdminAlertsPanel />
 
           {/* Recent Activity - Live Data */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="glass-card rounded-xl p-6">

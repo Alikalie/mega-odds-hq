@@ -43,6 +43,13 @@
       "when": 1790688901859,
       "tag": "0005_admin_brand_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790804870582,
+      "tag": "0006_admin_activity_log_and_interstitial_ad",
+      "breakpoints": true
     }
   ]
 }
