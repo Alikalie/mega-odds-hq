@@ -135,6 +135,19 @@ const AdminSiteSettingsPage = () => {
 
           <section className="glass-card rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
+              <h2 className="font-display font-bold">Tips Button Ad (Google)</h2>
+              <Switch checked={!!f.interstitial_ad_enabled} onCheckedChange={(v) => set("interstitial_ad_enabled", v)} />
+            </div>
+            <p className="text-xs text-muted-foreground">Shows a full-screen Google ad every time users tap Free Tips or Predictions in the bottom bar. They can skip after 5 seconds.</p>
+            <div>
+              <Label>Google ad unit ID (slot)</Label>
+              <Input placeholder="e.g. 1234567890" value={f.interstitial_ad_slot || ""} onChange={(e) => set("interstitial_ad_slot", e.target.value.replace(/\D/g, ""))} />
+              <p className="text-xs text-muted-foreground mt-1">Find it in Google AdSense → Ads → By ad unit.</p>
+            </div>
+          </section>
+
+          <section className="glass-card rounded-xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
               <h2 className="font-display font-bold">APK Download Link</h2>
               <Switch checked={f.apk_enabled} onCheckedChange={(v) => set("apk_enabled", v)} />
             </div>
