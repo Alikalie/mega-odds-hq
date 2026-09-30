@@ -11,7 +11,12 @@ import {
   Megaphone,
   ArrowUpCircle,
   Loader2,
+  Send,
+  Code2,
+  Shield,
+  Settings2,
 } from "lucide-react";
+import { AdminAlertsPanel } from "@/components/admin/AdminAlertsPanel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AdminGuard } from "@/components/guards/AdminGuard";
@@ -29,7 +34,7 @@ interface Activity {
 }
 
 const AdminDashboard = () => {
-  const { profile } = useAuth();
+  const { profile, isSuperAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 0,
     vipMembers: 0,
