@@ -1,4 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { InterstitialAd } from "@/components/ads/InterstitialAd";
 import { Trophy, Crown, Star, User, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -92,5 +95,6 @@ export const BottomNav = () => {
         })}
       </div>
     </nav>
+    </>
   );
 };
