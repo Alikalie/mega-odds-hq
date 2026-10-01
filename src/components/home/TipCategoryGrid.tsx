@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/icons/SportIcons";
+import { useAdGate } from "@/components/ads/AdGate";
 
 // Icon map for dynamic icon rendering
 const iconMap: Record<string, LucideIcon> = {
@@ -56,6 +57,7 @@ interface TipCategoryGridProps {
 }
 
 export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps) => {
+  const { goWithAd, adOn } = useAdGate();
   if (isLoading) {
     return (
       <div className="grid grid-cols-3 gap-2">
@@ -85,7 +87,16 @@ export const TipCategoryGrid = ({ categories, isLoading }: TipCategoryGridProps)
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.02, duration: 0.2 }}
           >
-            <Link to={href} className="block">
+            <Link
+              to={href}
+              className="block"
+              onClick={(e) => {
+                if (adOn) {
+                  e.preventDefault();
+                  goWithAd(href);
+                }
+              }}
+            >
               <div
                 className={cn(
                   "relative overflow-hidden rounded-lg p-2 aspect-square flex flex-col items-center justify-center gap-1 transition-all duration-200 tap-highlight group",
