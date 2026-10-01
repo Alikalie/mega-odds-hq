@@ -6,12 +6,13 @@ import { AdBanner } from "./AdBanner";
 interface Props {
   open: boolean;
   slot?: string | null;
+  custom?: { image?: string | null; link?: string | null; title?: string | null } | null;
   onClose: () => void;
 }
 
 const SKIP_AFTER = 5;
 
-export const InterstitialAd = ({ open, slot, onClose }: Props) => {
+export const InterstitialAd = ({ open, slot, custom, onClose }: Props) => {
   const [left, setLeft] = useState(SKIP_AFTER);
 
   useEffect(() => {
@@ -36,8 +37,19 @@ export const InterstitialAd = ({ open, slot, onClose }: Props) => {
         )}
       </div>
       <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-        <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center">
-          {slot ? (
+        <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden">
+          {custom?.image ? (
+            <a
+              href={custom.link || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full"
+              onClick={(e) => { if (!custom.link) e.preventDefault(); }}
+            >
+              <img src={custom.image} alt={custom.title || "Advertisement"} className="w-full h-auto object-contain" />
+              {custom.title && <p className="p-3 text-center font-semibold">{custom.title}</p>}
+            </a>
+          ) : slot ? (
             <AdBanner key={Date.now()} slot={slot} format="rectangle" className="w-full" />
           ) : (
             <p className="text-sm text-muted-foreground p-6 text-center">Ad space</p>
