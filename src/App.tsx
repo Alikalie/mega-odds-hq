@@ -1,4 +1,5 @@
 import AskTipsPage from "./pages/AskTipsPage";
+import { AdGateProvider } from "@/components/ads/AdGate";
 import { DynamicAppIcons } from "@/components/brand/DynamicAppIcons";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -50,6 +51,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AdGateProvider>
           <DynamicAppIcons />
           <Routes>
             {/* User Routes */}
@@ -93,6 +95,7 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AdGateProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
