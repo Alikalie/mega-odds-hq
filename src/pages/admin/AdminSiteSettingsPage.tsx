@@ -64,6 +64,19 @@ const AdminSiteSettingsPage = () => {
     toast.success("Logo uploaded — click Save to apply");
   };
 
+  const uploadAd = async (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 3 * 1024 * 1024) return toast.error("Image must be under 3 MB");
+    setUploading(true);
+    const path = `site-logo/ad-${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, "_")}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    setUploading(false);
+    if (error) return toast.error("Upload failed: " + error.message);
+    set("custom_ad_image_url", supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl);
+    toast.success("Ad image uploaded — click Save to apply");
+  };
+
   const apkError = f?.apk_enabled ? validateApkUrl(f?.apk_url) : null;
 
   const set = (k: string, v: any) => setF((p: any) => ({ ...p, [k]: v }));
@@ -138,11 +151,39 @@ const AdminSiteSettingsPage = () => {
               <h2 className="font-display font-bold">Tips Button Ad (Google)</h2>
               <Switch checked={!!f.interstitial_ad_enabled} onCheckedChange={(v) => set("interstitial_ad_enabled", v)} />
             </div>
-            <p className="text-xs text-muted-foreground">Shows a full-screen Google ad every time users tap Free Tips or Predictions in the bottom bar. They can skip after 5 seconds.</p>
+            <p className="text-xs text-muted-foreground">Shows a full-screen ad every time users open Free Tips, Predictions, VIP, Special or any category. They can skip after 5 seconds.</p>
             <div>
               <Label>Google ad unit ID (slot)</Label>
               <Input placeholder="e.g. 1234567890" value={f.interstitial_ad_slot || ""} onChange={(e) => set("interstitial_ad_slot", e.target.value.replace(/\D/g, ""))} />
               <p className="text-xs text-muted-foreground mt-1">Find it in Google AdSense → Ads → By ad unit.</p>
+            </div>
+            <div className="border-t border-border pt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Use my own ad (while waiting for Google)</Label>
+                  <p className="text-xs text-muted-foreground">When on, users see your image below instead of the Google ad.</p>
+                </div>
+                <Switch checked={!!f.custom_ad_enabled} onCheckedChange={(v) => set("custom_ad_enabled", v)} />
+              </div>
+              <div>
+                <Label>Ad image</Label>
+                <div className="flex items-center gap-3 mt-1">
+                  {f.custom_ad_image_url && <img src={f.custom_ad_image_url} alt="Ad preview" className="h-20 rounded-lg border border-border object-cover" />}
+                  <label className="inline-flex items-center gap-2 text-sm cursor-pointer px-3 py-2 rounded-lg border border-border hover:bg-muted">
+                    <Upload className="w-4 h-4" /> {uploading ? "Uploading..." : "Upload image"}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadAd(e.target.files?.[0])} />
+                  </label>
+                  {f.custom_ad_image_url && <Button size="sm" variant="ghost" onClick={() => set("custom_ad_image_url", null)}>Remove</Button>}
+                </div>
+              </div>
+              <div>
+                <Label>Title (optional)</Label>
+                <Input value={f.custom_ad_title || ""} onChange={(e) => set("custom_ad_title", e.target.value)} placeholder="e.g. Join our VIP today!" />
+              </div>
+              <div>
+                <Label>Link when tapped (optional)</Label>
+                <Input value={f.custom_ad_link || ""} onChange={(e) => set("custom_ad_link", e.target.value)} placeholder="https://..." />
+              </div>
             </div>
           </section>
 

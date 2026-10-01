@@ -490,6 +490,10 @@ export type Database = {
           cookie_style: string
           cookie_text_color: string
           cookie_version: number
+          custom_ad_enabled: boolean
+          custom_ad_image_url: string | null
+          custom_ad_link: string | null
+          custom_ad_title: string | null
           id: number
           interstitial_ad_enabled: boolean
           interstitial_ad_slot: string | null
@@ -512,6 +516,10 @@ export type Database = {
           cookie_style?: string
           cookie_text_color?: string
           cookie_version?: number
+          custom_ad_enabled?: boolean
+          custom_ad_image_url?: string | null
+          custom_ad_link?: string | null
+          custom_ad_title?: string | null
           id?: number
           interstitial_ad_enabled?: boolean
           interstitial_ad_slot?: string | null
@@ -534,6 +542,10 @@ export type Database = {
           cookie_style?: string
           cookie_text_color?: string
           cookie_version?: number
+          custom_ad_enabled?: boolean
+          custom_ad_image_url?: string | null
+          custom_ad_link?: string | null
+          custom_ad_title?: string | null
           id?: number
           interstitial_ad_enabled?: boolean
           interstitial_ad_slot?: string | null

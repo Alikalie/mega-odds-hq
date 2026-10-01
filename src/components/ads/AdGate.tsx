@@ -26,6 +26,15 @@ export const AdGateProvider = ({ children }: { children: ReactNode }) => {
       <InterstitialAd
         open={!!pending}
         slot={slot}
+        custom={
+          (settings as any)?.custom_ad_enabled && (settings as any)?.custom_ad_image_url
+            ? {
+                image: (settings as any).custom_ad_image_url,
+                link: (settings as any).custom_ad_link,
+                title: (settings as any).custom_ad_title,
+              }
+            : null
+        }
         onClose={() => {
           const p = pending;
           setPending(null);
