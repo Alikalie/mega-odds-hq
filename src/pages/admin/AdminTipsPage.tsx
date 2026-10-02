@@ -447,6 +447,15 @@ const AdminTipsPage = ({ tipType }: AdminTipsPageProps) => {
                         </Command>
                       </PopoverContent>
                     </Popover>
+                    <Input
+                      placeholder="Not in the list? Type the league name here"
+                      value={LEAGUES.some((l) => l.name === newTip.league) ? "" : newTip.league}
+                      onChange={(e) => setNewTip({ ...newTip, league: e.target.value })}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v) handleLeagueSelect(v);
+                      }}
+                    />
                     {isLoadingFixtures && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin" /> Fetching fixtures for {format(fixtureDate, "MMM d")}...
