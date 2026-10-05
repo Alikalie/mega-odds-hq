@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Briefcase, MapPin, Calendar, Banknote, Mail, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { Share2, Briefcase, MapPin, Calendar, Banknote, Mail, ExternalLink, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +19,8 @@ export type JobPost = {
 const JobsPage = () => {
   const enabled = useFeatureEnabled("jobs");
   const [open, setOpen] = useState<JobPost | null>(null);
+  const [params, setParams] = useSearchParams();
+  const { user, isLoading: authLoading } = useAuth();
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ["job_posts_public"],
     queryFn: async () => {
@@ -24,6 +29,31 @@ const JobsPage = () => {
       return data as JobPost[];
     },
   });
+
+  useEffect(() => {
+    const id = params.get("job");
+    if (id && jobs.length) { const j = jobs.find((x) => x.id === id); if (j) setOpen(j); }
+  }, [params, jobs]);
+
+  const close = () => { setOpen(null); if (params.get("job")) setParams({}); };
+  const share = async (j: JobPost) => {
+    const url = `${window.location.origin}/jobs?job=${j.id}`;
+    try { if (navigator.share) { await navigator.share({ title: j.title, url }); return; } } catch {}
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copied");
+  };
+
+  if (!authLoading && !user) {
+    return (
+      <AppLayout>
+        <div className="px-4 py-10 max-w-lg mx-auto text-center space-y-4">
+          <Briefcase className="w-10 h-10 text-primary mx-auto" />
+          <p className="text-muted-foreground">Sign in to view job adverts at Mega Odds.</p>
+          <Button variant="hero" asChild><Link to="/auth">Sign In / Register</Link></Button>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -57,7 +87,7 @@ const JobsPage = () => {
         )}
       </div>
 
-      <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
+      <Dialog open={!!open} onOpenChange={(v) => !v && close()}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           {open && (
             <>
@@ -76,6 +106,7 @@ const JobsPage = () => {
                 {open.apply_link && (
                   <Button variant="hero" asChild><a href={open.apply_link} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4 mr-2" />Apply now</a></Button>
                 )}
+                <Button variant="ghost" onClick={() => share(open)}><Share2 className="w-4 h-4 mr-2" />Share this job</Button>
                 {open.apply_email && (
                   <Button variant="outline" asChild><a href={`mailto:${open.apply_email}?subject=${encodeURIComponent("Application: " + open.title)}`}><Mail className="w-4 h-4 mr-2" />Email {open.apply_email}</a></Button>
                 )}
