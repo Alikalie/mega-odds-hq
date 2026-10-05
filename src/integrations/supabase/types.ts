@@ -272,6 +272,60 @@ export type Database = {
         }
         Relationships: []
       }
+      job_posts: {
+        Row: {
+          apply_email: string | null
+          apply_link: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          how_to_apply: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          job_type: string | null
+          location: string | null
+          requirements: string | null
+          salary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          apply_email?: string | null
+          apply_link?: string | null
+          created_at?: string
+          deadline?: string | null
+          description: string
+          how_to_apply?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          apply_email?: string | null
+          apply_link?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          how_to_apply?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
