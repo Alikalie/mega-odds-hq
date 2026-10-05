@@ -17,8 +17,10 @@ import {
   LayoutDashboard,
   Smartphone,
   Sparkles,
+  Briefcase,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useFeatureEnabled } from "@/hooks/useFeatureToggles";
 import { Button } from "@/components/ui/button";
 import { UserBadge } from "@/components/ui/user-badge";
 import { Switch } from "@/components/ui/switch";
@@ -43,6 +45,7 @@ const ProfilePage = () => {
   const { user, profile, isLoading, isAdmin, signOut } = useAuth();
   const { theme, toggleTheme, isDark } = useTheme();
   const { data: settings } = useSiteSettings();
+  const jobsEnabled = useFeatureEnabled("jobs");
    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
  
    useEffect(() => {
@@ -263,6 +266,18 @@ const ProfilePage = () => {
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <span className="flex-1 font-medium">AI Tips Assistant</span>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          )}
+          {jobsEnabled && (
+            <Link
+              to="/jobs"
+              className="flex items-center gap-4 p-4 glass-card rounded-xl hover:bg-secondary/50 transition-all"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-primary" />
+              </div>
+              <span className="flex-1 font-medium">Jobs at Mega Odds</span>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </Link>
           )}

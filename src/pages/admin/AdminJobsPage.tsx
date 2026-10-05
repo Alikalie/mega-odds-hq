@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import type { JobPost } from "@/pages/JobsPage";
 
 const empty: Partial<JobPost> = { title: "", description: "", is_active: true };

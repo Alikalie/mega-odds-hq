@@ -23,6 +23,7 @@ import {
   Settings2,
   ListOrdered,
   Cookie,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ const allSidebarItems = [
   { icon: Wallet, label: "Payments", href: "/admin/payments", superOnly: true },
   { icon: ArrowUpCircle, label: "Upgrade Requests", href: "/admin/upgrade-requests", superOnly: true },
   { icon: Shield, label: "Admin Roles", href: "/admin/roles", superOnly: true },
+  { icon: Briefcase, label: "Job Adverts", href: "/admin/jobs", superOnly: false },
   { icon: Code2, label: "Booking Codes", href: "/admin/booking-codes", superOnly: false },
   { icon: Settings2, label: "Feature Toggles", href: "/admin/feature-toggles", superOnly: true },
   { icon: ListOrdered, label: "Prediction Types", href: "/admin/prediction-types", superOnly: true },
