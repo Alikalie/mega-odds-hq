@@ -269,7 +269,7 @@ const ProfilePage = () => {
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </Link>
           )}
-          {jobsEnabled && (
+          {user && jobsEnabled && (
             <Link
               to="/jobs"
               className="flex items-center gap-4 p-4 glass-card rounded-xl hover:bg-secondary/50 transition-all"

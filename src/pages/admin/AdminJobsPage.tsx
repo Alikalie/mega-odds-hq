@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Upload, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Loader2, Share2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,18 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { JobPost } from "@/pages/JobsPage";
+import { sendPush } from "@/lib/webNotifications";
+
+export const jobLink = (id: string) => `${window.location.origin}/jobs?job=${id}`;
+
+const copyLink = async (id: string) => {
+  const url = jobLink(id);
+  try {
+    if (navigator.share) { await navigator.share({ title: "Job at Mega Odds", url }); return; }
+  } catch {}
+  await navigator.clipboard.writeText(url);
+  toast.success("Job link copied — paste it anywhere to share");
+};
 
 const empty: Partial<JobPost> = { title: "", description: "", is_active: true };
 
@@ -62,12 +74,23 @@ const AdminJobsPage = () => {
     setBusy(true);
     const { id, created_at, ...rest } = edit as any;
     const payload = { ...rest, deadline: rest.deadline || null };
-    const { error } = id
-      ? await supabase.from("job_posts").update(payload).eq("id", id)
-      : await supabase.from("job_posts").insert(payload);
+    const res = id
+      ? await supabase.from("job_posts").update(payload).eq("id", id).select("id").single()
+      : await supabase.from("job_posts").insert(payload).select("id").single();
     setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Job saved");
+    if (res.error) return toast.error(res.error.message);
+    const newId = res.data.id;
+    if (!id && payload.is_active) {
+      const link = jobLink(newId);
+      const { data: users } = await supabase.from("profiles").select("id");
+      if (users?.length) {
+        await supabase.from("notifications").insert(
+          users.map((u) => ({ user_id: u.id, title: "New job: " + payload.title, message: `Mega Odds is hiring! View and apply: ${link}` }))
+        );
+      }
+      sendPush({ all: true, title: "New job: " + payload.title, message: "Mega Odds is hiring — tap to view and apply", url: `/jobs?job=${newId}` });
+      toast.success("Job posted and users notified");
+    } else toast.success("Job saved");
     setEdit(null);
     refresh();
   };
@@ -104,6 +127,7 @@ const AdminJobsPage = () => {
               <p className="font-semibold truncate">{j.title}</p>
               <p className="text-xs text-muted-foreground">{j.is_active ? "Published" : "Hidden"}{j.deadline ? ` · deadline ${j.deadline}` : ""}</p>
             </div>
+            <Button size="icon" variant="ghost" title="Copy share link" onClick={() => copyLink(j.id)}><Share2 className="w-4 h-4" /></Button>
             <Button size="icon" variant="ghost" onClick={() => setEdit(j)}><Pencil className="w-4 h-4" /></Button>
             <Button size="icon" variant="ghost" onClick={() => remove(j.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
           </div>
