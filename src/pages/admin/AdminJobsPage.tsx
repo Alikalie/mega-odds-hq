@@ -13,16 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { JobPost } from "@/pages/JobsPage";
 import { sendPush } from "@/lib/webNotifications";
 
-export const jobLink = (id: string) => `${window.location.origin}/jobs?job=${id}`;
-
-const copyLink = async (id: string) => {
-  const url = jobLink(id);
-  try {
-    if (navigator.share) { await navigator.share({ title: "Job at Mega Odds", url }); return; }
-  } catch {}
-  await navigator.clipboard.writeText(url);
-  toast.success("Job link copied — paste it anywhere to share");
-};
+import { shareJob, jobUrl as jobLink } from "@/lib/shareJob";
+import { AdminApplications } from "@/components/jobs/AdminApplications";
 
 const empty: Partial<JobPost> = { title: "", description: "", is_active: true };
 
@@ -88,7 +80,7 @@ const AdminJobsPage = () => {
           users.map((u) => ({ user_id: u.id, title: "New job: " + payload.title, message: `Mega Odds is hiring! View and apply: ${link}` }))
         );
       }
-      sendPush({ all: true, title: "New job: " + payload.title, message: "Mega Odds is hiring — tap to view and apply", url: `/jobs?job=${newId}` });
+      sendPush({ all: true, title: "New job: " + payload.title, message: "Mega Odds is hiring — tap to view and apply", url: `/careers?job=${newId}` });
       toast.success("Job posted and users notified");
     } else toast.success("Job saved");
     setEdit(null);
@@ -127,12 +119,13 @@ const AdminJobsPage = () => {
               <p className="font-semibold truncate">{j.title}</p>
               <p className="text-xs text-muted-foreground">{j.is_active ? "Published" : "Hidden"}{j.deadline ? ` · deadline ${j.deadline}` : ""}</p>
             </div>
-            <Button size="icon" variant="ghost" title="Copy share link" onClick={() => copyLink(j.id)}><Share2 className="w-4 h-4" /></Button>
+            <Button size="icon" variant="ghost" title="Copy share link" onClick={() => shareJob(j)}><Share2 className="w-4 h-4" /></Button>
             <Button size="icon" variant="ghost" onClick={() => setEdit(j)}><Pencil className="w-4 h-4" /></Button>
             <Button size="icon" variant="ghost" onClick={() => remove(j.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
           </div>
         ))}
         {!isLoading && jobs.length === 0 && <p className="text-sm text-muted-foreground">No job adverts yet.</p>}
+        <AdminApplications jobTitles={Object.fromEntries(jobs.map((j) => [j.id, j.title]))} />
       </div>
 
       <Dialog open={!!edit} onOpenChange={(v) => !v && setEdit(null)}>
