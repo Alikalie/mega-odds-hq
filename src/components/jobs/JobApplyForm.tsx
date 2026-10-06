@@ -32,7 +32,7 @@ export const JobApplyForm = ({ jobId, onDone }: { jobId: string; onDone: () => v
     const path = `${user.id}/${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, "_")}`;
     const up = await supabase.storage.from("resumes").upload(path, file);
     if (up.error) { setBusy(false); return toast.error("Upload failed: " + up.error.message); }
-    const { error } = await supabase.from("job_applications").insert({ ...parsed.data, job_id: jobId, user_id: user.id, resume_path: path });
+    const { error } = await supabase.from("job_applications").insert({ full_name: parsed.data.full_name, email: parsed.data.email, phone: parsed.data.phone || null, cover_letter: parsed.data.cover_letter, job_id: jobId, user_id: user.id, resume_path: path });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Application sent! We'll be in touch.");

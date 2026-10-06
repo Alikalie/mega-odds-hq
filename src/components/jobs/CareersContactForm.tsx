@@ -22,7 +22,7 @@ export const CareersContactForm = () => {
     const p = schema.safeParse(f);
     if (!p.success) return toast.error(p.error.errors[0].message);
     setBusy(true);
-    const { error } = await supabase.from("career_messages").insert({ ...p.data, user_id: user?.id });
+    const { error } = await supabase.from("career_messages").insert({ full_name: p.data.full_name, email: p.data.email, message: p.data.message, user_id: user?.id });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Message sent to the Mega Odds team");
