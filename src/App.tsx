@@ -73,6 +73,7 @@ const App = () => (
             <Route path="/history/:type" element={<TipsHistoryPage />} />
             <Route path="/ask" element={<AskTipsPage />} />
             <Route path="/jobs" element={<JobsPage />} />
+            <Route path="/careers" element={<JobsPage />} />
             <Route path="/admin/jobs" element={<AdminGuard><AdminJobsPage /></AdminGuard>} />
             
             {/* Admin Routes */}

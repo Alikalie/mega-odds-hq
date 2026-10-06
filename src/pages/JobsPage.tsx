@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useFeatureEnabled } from "@/hooks/useFeatureToggles";
+import { shareJob } from "@/lib/shareJob";
+import { JobApplyForm } from "@/components/jobs/JobApplyForm";
+import { CareersContactForm } from "@/components/jobs/CareersContactForm";
 
 export type JobPost = {
   id: string; title: string; location: string | null; job_type: string | null; salary: string | null;
@@ -36,19 +39,14 @@ const JobsPage = () => {
   }, [params, jobs]);
 
   const close = () => { setOpen(null); if (params.get("job")) setParams({}); };
-  const share = async (j: JobPost) => {
-    const url = `${window.location.origin}/jobs?job=${j.id}`;
-    try { if (navigator.share) { await navigator.share({ title: j.title, url }); return; } } catch {}
-    await navigator.clipboard.writeText(url);
-    toast.success("Link copied");
-  };
+  const share = (j: JobPost) => shareJob(j);
 
   if (!authLoading && !user) {
     return (
       <AppLayout>
         <div className="px-4 py-10 max-w-lg mx-auto text-center space-y-4">
           <Briefcase className="w-10 h-10 text-primary mx-auto" />
-          <p className="text-muted-foreground">Sign in to view job adverts at Mega Odds.</p>
+          <p className="text-muted-foreground">Sign in to view careers and apply for jobs at Mega Odds.</p>
           <Button variant="hero" asChild><Link to="/auth">Sign In / Register</Link></Button>
         </div>
       </AppLayout>
@@ -60,8 +58,9 @@ const JobsPage = () => {
       <div className="px-4 py-6 max-w-lg mx-auto space-y-4">
         <div className="flex items-center gap-2">
           <Briefcase className="w-6 h-6 text-primary" />
-          <h1 className="font-display font-bold text-xl">Jobs at Mega Odds</h1>
+          <h1 className="font-display font-bold text-xl">Careers at Mega Odds</h1>
         </div>
+        <p className="text-sm text-muted-foreground">Browse open positions below. Tap a job to see full details, then apply with your resume and cover letter right here.</p>
         {!enabled ? (
           <p className="text-sm text-muted-foreground">Job adverts are not available right now.</p>
         ) : isLoading ? (
@@ -85,6 +84,7 @@ const JobsPage = () => {
             </button>
           ))
         )}
+        <CareersContactForm />
       </div>
 
       <Dialog open={!!open} onOpenChange={(v) => !v && close()}>
@@ -111,6 +111,7 @@ const JobsPage = () => {
                   <Button variant="outline" asChild><a href={`mailto:${open.apply_email}?subject=${encodeURIComponent("Application: " + open.title)}`}><Mail className="w-4 h-4 mr-2" />Email {open.apply_email}</a></Button>
                 )}
               </div>
+              <JobApplyForm jobId={open.id} onDone={close} />
             </>
           )}
         </DialogContent>
