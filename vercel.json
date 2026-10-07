@@ -1,8 +1,6 @@
 {
-  "rewrites":[
-    {
-      "source": "/(.*)",
-      "destination":"/"
-    }
+  "rewrites": [
+    { "source": "/job/:id", "destination": "/api/job?id=:id" },
+    { "source": "/((?!api/).*)", "destination": "/" }
   ]
 }
