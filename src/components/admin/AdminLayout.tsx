@@ -1,4 +1,5 @@
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { AdminAvatarUpload } from "@/components/admin/AdminAvatarUpload";
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -162,9 +163,7 @@ export const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 {isSuperAdmin ? "Super Admin" : "Admin"}
               </p>
             </div>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center text-primary-foreground font-bold">
-              {(profile?.full_name?.[0] || "A").toUpperCase()}
-            </div>
+            <AdminAvatarUpload />
           </div>
         </header>
 
