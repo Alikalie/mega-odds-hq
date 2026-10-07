@@ -1,11 +1,12 @@
 import { toast } from "sonner";
 
-export const jobUrl = (id: string) => `${window.location.origin}/careers?job=${id}`;
+/** Share link served as real HTML (with job picture + full description) so previews work on every device. */
+export const jobUrl = (id: string) => `https://mega-odds-hq.vercel.app/job/${id}`;
 
 /** Shares the job link together with its image (when supported) so the picture shows in WhatsApp etc. */
-export const shareJob = async (job: { id: string; title: string; image_url?: string | null }) => {
+export const shareJob = async (job: { id: string; title: string; image_url?: string | null; description?: string | null; location?: string | null }) => {
   const url = jobUrl(job.id);
-  const text = `${job.title} — Mega Odds is hiring! View and apply: ${url}`;
+  const text = `${job.title} — Mega Odds is hiring!${job.location ? `\n📍 ${job.location}` : ""}${job.description ? `\n\n${job.description}` : ""}\n\nView and apply: ${url}`;
   try {
     if (navigator.share) {
       if (job.image_url) {
