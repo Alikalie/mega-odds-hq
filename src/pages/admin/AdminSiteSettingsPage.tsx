@@ -189,6 +189,35 @@ const AdminSiteSettingsPage = () => {
 
           <section className="glass-card rounded-xl p-5 space-y-4">
             <div className="flex items-center justify-between">
+              <h2 className="font-display font-bold">Partner Ad Banner</h2>
+              <Switch checked={!!f.partner_ad_enabled} onCheckedChange={(v) => set("partner_ad_enabled", v)} />
+            </div>
+            <p className="text-xs text-muted-foreground">Shows a sponsored banner on the home page. Tapping it opens your partner link in a new tab.</p>
+            <div>
+              <Label>Partner link</Label>
+              <Input value={f.partner_ad_url || ""} onChange={(e) => set("partner_ad_url", e.target.value)} placeholder="https://..." />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Title</Label>
+                <Input value={f.partner_ad_label || ""} onChange={(e) => set("partner_ad_label", e.target.value)} placeholder="e.g. Bet with 1xBet" />
+              </div>
+              <div>
+                <Label>Subtext</Label>
+                <Input value={f.partner_ad_subtext || ""} onChange={(e) => set("partner_ad_subtext", e.target.value)} placeholder="e.g. Register now and get your welcome bonus" />
+              </div>
+            </div>
+            {f.partner_ad_enabled && f.partner_ad_url && (
+              <div className="rounded-xl border border-primary/30 bg-primary/10 p-3 text-xs">
+                <span className="uppercase tracking-wider text-muted-foreground">Sponsored</span>
+                <p className="font-bold text-sm mt-0.5">{f.partner_ad_label || "Partner offer"}</p>
+                <p className="text-muted-foreground">{f.partner_ad_subtext}</p>
+              </div>
+            )}
+          </section>
+
+          <section className="glass-card rounded-xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
               <h2 className="font-display font-bold">APK Download Link</h2>
               <Switch checked={f.apk_enabled} onCheckedChange={(v) => set("apk_enabled", v)} />
             </div>
