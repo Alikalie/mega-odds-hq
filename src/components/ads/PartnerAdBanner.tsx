@@ -1,5 +1,6 @@
 import { ExternalLink, Megaphone } from "lucide-react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { ReferralBanners } from "./ReferralBanners";
 
 export const PartnerAdBanner = () => {
   const { data: settings } = useSiteSettings();
@@ -8,6 +9,7 @@ export const PartnerAdBanner = () => {
   if (!s?.partner_ad_enabled || !s?.partner_ad_url) return null;
 
   return (
+    <>
     <a
       href={s.partner_ad_url}
       target="_blank"
@@ -28,5 +30,7 @@ export const PartnerAdBanner = () => {
         Join <ExternalLink className="w-3 h-3" />
       </span>
     </a>
+    <ReferralBanners />
+    </>
   );
 };
