@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Calendar, TrendingUp, Shield, Loader2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
 
 const ratingColors: Record<string, string> = {
   strong_value: "text-green-500 bg-green-500/10",
@@ -188,6 +189,8 @@ const PredictionsPage = () => {
           </div>
           <p className="text-sm text-muted-foreground">Edge analysis & value picks powered by AI</p>
         </motion.div>
+
+        <PartnerAdBanner />
 
         {/* Date Picker */}
         <div className="flex items-center justify-between glass-card rounded-xl p-3">

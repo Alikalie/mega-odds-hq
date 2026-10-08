@@ -14,6 +14,7 @@ import { useTipCategories } from "@/hooks/useTipCategories";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
+import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
 
 
 const statusConfig = {
@@ -111,6 +112,8 @@ const VipPage = () => {
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">Choose your VIP plan and start winning with premium predictions.</p>
           </motion.div>
 
+          <PartnerAdBanner />
+
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-5 space-y-3">
             <h3 className="font-semibold flex items-center gap-2"><Sparkles className="w-5 h-5 text-vip" />Why Go VIP?</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -170,6 +173,8 @@ const VipPage = () => {
           </div>
           <p className="text-sm text-muted-foreground">Premium predictions for VIP members</p>
         </motion.div>
+
+        <PartnerAdBanner />
 
         {/* Category Tabs */}
         {vipCategories.length > 0 && (
