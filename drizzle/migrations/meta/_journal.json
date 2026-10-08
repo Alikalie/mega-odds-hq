@@ -71,6 +71,13 @@
       "when": 1791293312188,
       "tag": "0009_job_applications_careers",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791455021004,
+      "tag": "0010_partner_ad_banner",
+      "breakpoints": true
     }
   ]
 }

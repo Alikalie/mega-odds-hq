@@ -626,6 +626,10 @@ export type Database = {
           interstitial_ad_enabled: boolean
           interstitial_ad_slot: string | null
           logo_url: string | null
+          partner_ad_enabled: boolean
+          partner_ad_label: string
+          partner_ad_subtext: string
+          partner_ad_url: string
           updated_at: string
         }
         Insert: {
@@ -652,6 +656,10 @@ export type Database = {
           interstitial_ad_enabled?: boolean
           interstitial_ad_slot?: string | null
           logo_url?: string | null
+          partner_ad_enabled?: boolean
+          partner_ad_label?: string
+          partner_ad_subtext?: string
+          partner_ad_url?: string
           updated_at?: string
         }
         Update: {
@@ -678,6 +686,10 @@ export type Database = {
           interstitial_ad_enabled?: boolean
           interstitial_ad_slot?: string | null
           logo_url?: string | null
+          partner_ad_enabled?: boolean
+          partner_ad_label?: string
+          partner_ad_subtext?: string
+          partner_ad_url?: string
           updated_at?: string
         }
         Relationships: []
