@@ -26,6 +26,7 @@ export const AdGateProvider = ({ children }: { children: ReactNode }) => {
       <InterstitialAd
         open={!!pending}
         slot={slot}
+        referral={!(settings as any)?.custom_ad_enabled || !(settings as any)?.custom_ad_image_url}
         custom={
           (settings as any)?.custom_ad_enabled && (settings as any)?.custom_ad_image_url
             ? {

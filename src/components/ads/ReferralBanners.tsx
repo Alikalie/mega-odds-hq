@@ -1,10 +1,13 @@
+// ============= Full file contents =============
 import { useEffect, useRef, useState } from "react";
 
 const banners = [
-  { tag: "d_6193043m_3730c_", site: "6193043", ad: "3730", width: 300, height: 50 },
   { tag: "d_6192817m_3730c_", site: "6192817", ad: "3730", width: 300, height: 50 },
   { tag: "d_6192817m_3847c_", site: "6192817", ad: "3847", width: 475, height: 75 },
 ];
+
+// 300x600 used as the pop-up banner
+export const POPUP_BANNER = { tag: "d_6192817m_37439c_", site: "6192817", ad: "37439", width: 300, height: 600 };
 
 const ReferralBanner = ({ banner, index }: { banner: typeof banners[number]; index: number }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +44,13 @@ const ReferralBanner = ({ banner, index }: { banner: typeof banners[number]; ind
 };
 
 export const ReferralBanners = () => (
-  <div className="mx-4 mt-3 space-y-3" aria-label="Sponsored partner banners">
+  <div className="mx-4 mt-8 mb-2 pb-4 space-y-3" aria-label="Partner banners">
     {banners.map((banner, index) => <ReferralBanner key={banner.tag} banner={banner} index={index} />)}
+  </div>
+);
+
+export const ReferralPopupBanner = () => (
+  <div className="w-full max-w-[300px] mx-auto" aria-label="Partner pop-up banner">
+    <ReferralBanner banner={POPUP_BANNER} index={0} />
   </div>
 );
