@@ -112,8 +112,6 @@ const VipPage = () => {
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">Choose your VIP plan and start winning with premium predictions.</p>
           </motion.div>
 
-          <PartnerAdBanner />
-
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-5 space-y-3">
             <h3 className="font-semibold flex items-center gap-2"><Sparkles className="w-5 h-5 text-vip" />Why Go VIP?</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -154,6 +152,8 @@ const VipPage = () => {
               <Link to="/auth"><Lock className="w-4 h-4 mr-2" />Login to Access VIP</Link>
             </Button>
           </motion.div>
+
+          <ReferralBanners />
         </div>
       </AppLayout>
     );
@@ -173,8 +173,6 @@ const VipPage = () => {
           </div>
           <p className="text-sm text-muted-foreground">Premium predictions for VIP members</p>
         </motion.div>
-
-        <PartnerAdBanner />
 
         {/* Category Tabs */}
         {vipCategories.length > 0 && (
@@ -232,6 +230,8 @@ const VipPage = () => {
             </motion.div>
           )}
         </motion.div>
+
+        <ReferralBanners />
       </div>
     </AppLayout>
   );

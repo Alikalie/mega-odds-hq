@@ -14,9 +14,6 @@ const Index = () => {
         {/* VIP Banner */}
         <VipBanner />
 
-        {/* Partner Ad */}
-        <PartnerAdBanner />
-
         {/* Categories Grid */}
         <div className="flex-1 px-4 py-6">
           <TipCategoryGrid
@@ -24,6 +21,9 @@ const Index = () => {
             isLoading={isLoading}
           />
         </div>
+
+        {/* Partner banners near the bottom */}
+        <ReferralBanners />
       </div>
     </AppLayout>
   );
