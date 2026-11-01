@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdBanner } from "./AdBanner";
+import { ReferralPopupBanner } from "./ReferralBanners";
 
 interface Props {
   open: boolean;
   slot?: string | null;
   custom?: { image?: string | null; link?: string | null; title?: string | null } | null;
+  referral?: boolean;
   onClose: () => void;
 }
 
 const SKIP_AFTER = 5;
 
-export const InterstitialAd = ({ open, slot, custom, onClose }: Props) => {
+export const InterstitialAd = ({ open, slot, custom, referral, onClose }: Props) => {
   const [left, setLeft] = useState(SKIP_AFTER);
 
   useEffect(() => {
@@ -37,8 +39,8 @@ export const InterstitialAd = ({ open, slot, custom, onClose }: Props) => {
         )}
       </div>
       <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-        <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden">
-          {custom?.image ? (
+        {custom?.image ? (
+          <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden">
             <a
               href={custom.link || undefined}
               target="_blank"
@@ -49,12 +51,20 @@ export const InterstitialAd = ({ open, slot, custom, onClose }: Props) => {
               <img src={custom.image} alt={custom.title || "Advertisement"} className="w-full h-auto object-contain" />
               {custom.title && <p className="p-3 text-center font-semibold">{custom.title}</p>}
             </a>
-          ) : slot ? (
+          </div>
+        ) : referral ? (
+          <div className="w-full max-w-[320px] max-h-[calc(100%-2rem)] rounded-xl border border-border bg-card p-2 overflow-hidden">
+            <ReferralPopupBanner />
+          </div>
+        ) : slot ? (
+          <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden">
             <AdBanner key={Date.now()} slot={slot} format="rectangle" className="w-full" />
-          ) : (
+          </div>
+        ) : (
+          <div className="w-full max-w-md min-h-[300px] rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden">
             <p className="text-sm text-muted-foreground p-6 text-center">Ad space</p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

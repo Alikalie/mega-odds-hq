@@ -13,7 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBookingCodes } from "@/hooks/useBookingCodes";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 
 
 const statusConfig = {
@@ -83,7 +83,6 @@ const FreeTipsPage = () => {
           </div>
           <p className="text-sm text-muted-foreground">Today's predictions</p>
         </motion.div>
-        <PartnerAdBanner />
         {/* Booking Codes */}
         {bookingCodesEnabled && categoryBookingCodes.length > 0 && (
           <div className="space-y-2">
@@ -138,8 +137,9 @@ const FreeTipsPage = () => {
             <h3 className="font-semibold text-lg mb-1">No Tips Available</h3>
             <p className="text-sm text-muted-foreground">Check back later for new predictions</p>
           </motion.div>
-        )}
-        
+          )}
+
+        <ReferralBanners />
       </div>
     </AppLayout>
   );

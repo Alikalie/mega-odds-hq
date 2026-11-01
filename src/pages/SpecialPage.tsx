@@ -13,7 +13,7 @@ import { useSubscriptionPackages } from "@/hooks/useSubscriptionPackages";
 import { useTipCategories } from "@/hooks/useTipCategories";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 
 
 const statusConfig = {
@@ -110,8 +110,6 @@ const SpecialPage = () => {
             <p className="text-muted-foreground text-sm max-w-xs mx-auto">Exclusive high-stakes predictions for serious bettors. Choose your tier.</p>
           </motion.div>
 
-          <PartnerAdBanner />
-
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card rounded-2xl p-5 space-y-4">
             <h3 className="font-semibold flex items-center gap-2"><Shield className="w-5 h-5 text-special" />Special Member Benefits</h3>
             <div className="space-y-3">
@@ -150,6 +148,8 @@ const SpecialPage = () => {
               <Link to="/auth"><Lock className="w-4 h-4 mr-2" />Login to Access Special</Link>
             </Button>
           </motion.div>
+
+          <ReferralBanners />
         </div>
       </AppLayout>
     );
@@ -169,8 +169,6 @@ const SpecialPage = () => {
           </div>
           <p className="text-sm text-muted-foreground">Exclusive predictions for Special members</p>
         </motion.div>
-
-        <PartnerAdBanner />
 
         {/* Category Tabs */}
         {specialCategories.length > 0 && (
@@ -228,6 +226,8 @@ const SpecialPage = () => {
             </motion.div>
           )}
         </motion.div>
+
+        <ReferralBanners />
       </div>
     </AppLayout>
   );

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { VipBanner } from "@/components/home/VipBanner";
 import { TipCategoryGrid } from "@/components/home/TipCategoryGrid";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 import { useTipCategories } from "@/hooks/useTipCategories";
 
 const Index = () => {
@@ -14,9 +14,6 @@ const Index = () => {
         {/* VIP Banner */}
         <VipBanner />
 
-        {/* Partner Ad */}
-        <PartnerAdBanner />
-
         {/* Categories Grid */}
         <div className="flex-1 px-4 py-6">
           <TipCategoryGrid
@@ -24,6 +21,9 @@ const Index = () => {
             isLoading={isLoading}
           />
         </div>
+
+        {/* Partner banners near the bottom */}
+        <ReferralBanners />
       </div>
     </AppLayout>
   );
