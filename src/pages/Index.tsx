@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { VipBanner } from "@/components/home/VipBanner";
 import { TipCategoryGrid } from "@/components/home/TipCategoryGrid";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 import { useTipCategories } from "@/hooks/useTipCategories";
 
 const Index = () => {

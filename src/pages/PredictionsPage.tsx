@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Calendar, TrendingUp, Shield, Loader2, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 
 const ratingColors: Record<string, string> = {
   strong_value: "text-green-500 bg-green-500/10",

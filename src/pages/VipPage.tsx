@@ -14,7 +14,7 @@ import { useTipCategories } from "@/hooks/useTipCategories";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 
 
 const statusConfig = {

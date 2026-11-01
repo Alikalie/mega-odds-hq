@@ -13,7 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useBookingCodes } from "@/hooks/useBookingCodes";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { BookingCodeCard } from "@/components/cards/BookingCodeCard";
-import { PartnerAdBanner } from "@/components/ads/PartnerAdBanner";
+import { ReferralBanners } from "@/components/ads/ReferralBanners";
 
 
 const statusConfig = {
